@@ -43,6 +43,34 @@ void Parser::compileBody(const std::function<void(Cell *)> &sink) {
             int64_t loc = std::stoi(_tokenizer.getNext());
             if (_tokenizer.getNext() != ")") throw std::invalid_argument("Expected )");
             sink(_vm.makeCell<ConsCell>(_vm.makeCell<IntCell>(frame), _vm.makeCell<IntCell>(loc)));
+        } else if (token == "SEL") {
+            std::stack<Cell *> outt;
+            compileBody([&outt](Cell *cmd) { outt.emplace(cmd); });
+            std::stack<Cell *> outf;
+            compileBody([&outf](Cell *cmd) { outf.emplace(cmd); });
+
+            if (outt.empty()) throw std::invalid_argument("Function body empty");
+            if (outf.empty()) throw std::invalid_argument("Function body empty");
+
+            ConsCell *ttop = _vm.makeCell<ConsCell>(outt.top());
+            outt.pop();
+            while (!outt.empty()) {
+                _vm.push(ttop, outt.top());
+                outt.pop();
+            }
+
+            ConsCell *ftop = _vm.makeCell<ConsCell>(outf.top());
+            outf.pop();
+            while (!outf.empty()) {
+                _vm.push(ftop, outf.top());
+                outf.pop();
+            }
+
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::SEL));
+            sink(ttop);
+            sink(ftop);
+        } else if (token == "JOIN") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::JOIN));
         } else if (token == "LDF") {
             std::stack<Cell *> out;
 
@@ -59,22 +87,31 @@ void Parser::compileBody(const std::function<void(Cell *)> &sink) {
             }
             sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::LDF));
             sink(fntop);
-        } else if (token == "CONS") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::CONS));
         } else if (token == "AP") {
             sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::AP));
-        } else if (token == "ADD") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::ADD));
         } else if (token == "RET") {
             sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::RET));
+        } else if (token == "DUM") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::DUM));
+        } else if (token == "RAP") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::RAP));
+        } else if (token == "STOP") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::STOP));
+        } else if (token == "ADD") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::ADD));
+        } else if (token == "SUB") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::SUB));
+        } else if (token == "READCHAR") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::READCHAR));
         } else if (token == "PUTCHAR") {
             sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::PUTCHAR));
         } else if (token == "PUTNUM") {
             sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::PUTNUM));
-        } else if (token == "STOP") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::STOP));
+        } else if (token == "CONS") {
+            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::CONS));
         } else {
-            if (token != ")")throw std::invalid_argument("Unknown token " + token);
+            if (token != ")")
+                throw std::invalid_argument("Unknown token " + token);
         }
     }
 }
