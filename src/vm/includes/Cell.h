@@ -48,6 +48,9 @@ struct CommandCell : public IntCell {
 
         READCHAR = 201,
         PUTCHAR = 202,
+        PUTNUM = 203,
+
+        CONS = 301,
         END = 1000
     };
 
