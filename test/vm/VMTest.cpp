@@ -64,3 +64,32 @@ TEST(VMTest, SelTest) {
     ssout.flush();
     EXPECT_EQ(ssout.str(), "14");
 }
+
+TEST(VMTest, SimpleFunction) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+        VM vm(ssin, ssout);
+        vm.appendCommand(vm.makeCell<CommandCell>(CommandCell::CommandNum::STOP));
+        vm.appendCommand(vm.makeCell<CommandCell>(CommandCell::CommandNum::PUTCHAR));
+
+        vm.appendCommand(vm.makeCell<CommandCell>(CommandCell::CommandNum::AP));
+
+        // Add function
+        ConsCell *addfn = vm.makeCell<ConsCell>(vm.makeCell<CommandCell>(CommandCell::CommandNum::RET));
+        vm.push(addfn, vm.makeCell<CommandCell>(CommandCell::CommandNum::ADD));
+        vm.push(addfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(2)));
+        vm.push(addfn, vm.makeCell<CommandCell>(CommandCell::CommandNum::LD));
+        vm.push(addfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
+        vm.push(addfn, vm.makeCell<CommandCell>(CommandCell::CommandNum::LD));
+        vm.appendCommand(addfn);
+        vm.appendCommand(vm.makeCell<CommandCell>(CommandCell::CommandNum::LDF));
+        vm.appendCommand(
+                vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<ConsCell>(vm.makeCell<IntCell>('2'))));
+        vm.appendCommand(vm.makeCell<CommandCell>(CommandCell::CommandNum::LDC));
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "3");
+
+}

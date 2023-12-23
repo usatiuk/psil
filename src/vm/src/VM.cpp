@@ -20,8 +20,7 @@ void VM::step() {
             break;
         }
         case CommandCell::CommandNum::LDC: {
-            IntCell *popped2 = dynamic_cast<IntCell *>(pop(_c));
-            push(_s, popped2);
+            push(_s, pop(_c));
             break;
         }
         case CommandCell::CommandNum::LD: {
@@ -29,7 +28,22 @@ void VM::step() {
 
             int64_t frame = dynamic_cast<IntCell *>(popped2->_car)->_val;
             int64_t arg = dynamic_cast<IntCell *>(popped2->_cdr)->_val;
-            // todo
+
+            assert(frame > 0);
+            assert(arg > 0);
+
+            ConsCell *curFrame = _e;
+
+            for (int i = 1; i < frame; i++) {
+                curFrame = dynamic_cast<ConsCell *>(_e->_cdr);
+            }
+
+            ConsCell *curArg = dynamic_cast<ConsCell *>(curFrame->_car);
+            for (int i = 1; i < arg; i++) {
+                curArg = dynamic_cast<ConsCell *>(curArg->_cdr);
+            }
+
+            push(_s, curArg->_car);
 
             break;
         }
@@ -53,12 +67,37 @@ void VM::step() {
             break;
         }
         case CommandCell::CommandNum::LDF: {
+            ConsCell *fn = dynamic_cast<ConsCell *>(pop(_c));
+            push(_s, makeCell<ConsCell>(fn, _e));
             break;
         }
         case CommandCell::CommandNum::AP: {
+            ConsCell *closure = dynamic_cast<ConsCell *>(pop(_s));
+            ConsCell *args = dynamic_cast<ConsCell *>(pop(_s));
+
+            push(_d, _s);
+            push(_d, _e);
+            push(_d, _c);
+
+            _s = makeCell<ConsCell>();
+            _c = dynamic_cast<ConsCell *>(closure->_car);
+            _e = dynamic_cast<ConsCell *>(closure->_cdr);
+            push(_e, args);
             break;
         }
         case CommandCell::CommandNum::RET: {
+            ConsCell *c = dynamic_cast<ConsCell *>(pop(_d));
+            ConsCell *e = dynamic_cast<ConsCell *>(pop(_d));
+            ConsCell *s = dynamic_cast<ConsCell *>(pop(_d));
+
+            Cell *ret = pop(_s);
+
+            _c = c;
+            _e = e;
+            _s = s;
+
+            push(_s, ret);
+
             break;
         }
         case CommandCell::CommandNum::DUM: {
@@ -72,23 +111,31 @@ void VM::step() {
             break;
         }
         case CommandCell::CommandNum::ADD: {
+            IntCell *a1 = dynamic_cast<IntCell *>(pop(_s));
+            IntCell *a2 = dynamic_cast<IntCell *>(pop(_s));
+            push(_s, makeCell<IntCell>(a1->_val + a2->_val));
             break;
         }
         case CommandCell::CommandNum::SUB: {
             break;
         }
-        case CommandCell::CommandNum::END: {
-            break;
-        }
-        case CommandCell::CommandNum::READCHAR:
+        case CommandCell::CommandNum::READCHAR: {
             char c;
             _instream >> c;
             push(_s, makeCell<IntCell>(c));
             break;
-        case CommandCell::CommandNum::PUTCHAR:
+        }
+        case CommandCell::CommandNum::PUTCHAR: {
             IntCell *popped2 = dynamic_cast<IntCell *>(pop(_s));
             _outstream << (char) popped2->_val;
             break;
+        }
+        case CommandCell::CommandNum::END: {
+            assert(false);
+            break;
+        }
+        default:
+            assert(false);
     }
 
 }
