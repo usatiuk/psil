@@ -5,9 +5,10 @@
 #ifndef PSIL_VM_H
 #define PSIL_VM_H
 
-#include <vector>
-#include<utility>
 #include <iostream>
+#include <list>
+#include <utility>
+#include <vector>
 
 #include "Cell.h"
 
@@ -19,10 +20,10 @@ public:
 
     void step();
 
-//    template<typename T>
-//    void appendCommand(T cell) {
-//        push(_c, makeCell<T>(std::move(cell)));
-//    }
+    //    template<typename T>
+    //    void appendCommand(T cell) {
+    //        push(_c, makeCell<T>(std::move(cell)));
+    //    }
 
     template<typename T>
     void appendCommand(T *cell) {
@@ -57,8 +58,10 @@ public:
         return what;
     }
 
+    uint64_t cellCount() const;
+
 private:
-    std::vector<Cell *> _cells;
+    std::list<Cell *> _cells;
     ConsCell *_s = nullptr;
     ConsCell *_e = nullptr;
     ConsCell *_c = nullptr;
@@ -67,7 +70,9 @@ private:
 
     std::istream &_instream;
     std::ostream &_outstream;
+
+    void gc();
 };
 
 
-#endif //PSIL_VM_H
+#endif//PSIL_VM_H

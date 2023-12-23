@@ -2,10 +2,11 @@
 // Created by Stepan Usatiuk on 22.12.2023.
 //
 
-#include "../includes/VM.h"
+#include "VM.h"
 
-#include <utility>
 #include <iostream>
+#include <set>
+#include <utility>
 
 void VM::run() {
     while (!_stop) step();
@@ -113,7 +114,7 @@ void VM::step() {
             _s = s;
 
             push(_s, ret);
-
+            gc();
             break;
         }
         case CommandCell::CommandNum::DUM: {
@@ -143,6 +144,7 @@ void VM::step() {
         }
         case CommandCell::CommandNum::STOP: {
             _stop = true;
+            gc();
             break;
         }
         case CommandCell::CommandNum::ADD: {
@@ -188,7 +190,46 @@ void VM::step() {
         default:
             assert(false);
     }
-
 }
 
 VM::VM(std::istream &instream, std::ostream &outstream) : _instream(instream), _outstream(outstream) {}
+
+void VM::gc() {
+    std::function<void(ConsCell *)> visit = [&](ConsCell *c) {
+        if (c == nullptr) return;
+        if (c->live) return;
+
+        c->live = true;
+
+        if (c->_car) {
+            if (c->_car->_type == CellType::CONS) visit(dynamic_cast<ConsCell *>(c->_car));
+            c->_car->live = true;
+        }
+        if (c->_cdr) {
+            if (c->_cdr->_type == CellType::CONS) visit(dynamic_cast<ConsCell *>(c->_cdr));
+            c->_cdr->live = true;
+        }
+    };
+    visit(_s);
+    visit(_e);
+    visit(_c);
+    visit(_d);
+
+    uint64_t freed = 0;
+
+    _cells.remove_if([&](Cell *l) {
+        bool ret = !l->live;
+        if (ret) {
+            freed += 1;
+            delete l;
+        } else {
+            l->live = false;
+        }
+        return ret;
+    });
+
+    std::cout << "GC Freed " << freed << std::endl;
+}
+uint64_t VM::cellCount() const {
+    return _cells.size();
+}

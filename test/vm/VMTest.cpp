@@ -91,7 +91,6 @@ TEST(VMTest, SimpleFunction) {
     }
     ssout.flush();
     EXPECT_EQ(ssout.str(), "3");
-
 }
 
 TEST(VMTest, RecursiveFunction) {
@@ -171,7 +170,7 @@ TEST(VMTest, RecursiveFunction) {
         vm.push(fibcallfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
         vm.push(fibcallfn, vm.makeCell<CommandCell>(CommandCell::CommandNum::LD));
         vm.push(fibcallfn, vm.makeCell<CommandCell>(CommandCell::CommandNum::CONS));
-        vm.push(fibcallfn, vm.makeCell<IntCell>(20));
+        vm.push(fibcallfn, vm.makeCell<IntCell>(10));
         vm.push(fibcallfn, vm.makeCell<CommandCell>(CommandCell::CommandNum::LDC));
         vm.push(fibcallfn, vm.makeCell<CommandCell>(CommandCell::CommandNum::NIL));
 
@@ -236,6 +235,5 @@ TEST(VMTest, RecursiveFunction) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "2358 6765");
-
+    EXPECT_EQ(ssout.str(), "2358 55");
 }

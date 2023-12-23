@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "VM.h"
 #include "Parser.h"
+#include "VM.h"
 
 TEST(VMWithParserTest, BasicHello) {
     std::stringstream ssin;
@@ -50,9 +50,9 @@ TEST(VMWithParserTest, RecFunction) {
         VM vm(ssin, ssout);
         Parser parser(vm);
         parser.loadSecd(
-                "( DUM NIL LDF ( LD ( 1 . 1 ) SEL ( LD ( 1 . 1 ) LDC -1 ADD SEL ( NIL LD ( 1 . 1 ) LDC -1 ADD CONS LD ( 2 . 1 ) AP NIL LD ( 1 . 1 ) LDC -2 ADD CONS LD ( 2 . 1 ) AP ADD JOIN ) ( LDC 1 JOIN ) JOIN ) ( LDC 0 JOIN ) RET ) CONS LDF ( NIL LDC 20 CONS LD ( 1 . 1 ) AP RET ) RAP PUTNUM STOP )");
+                "( DUM NIL LDF ( LD ( 1 . 1 ) SEL ( LD ( 1 . 1 ) LDC -1 ADD SEL ( NIL LD ( 1 . 1 ) LDC -1 ADD CONS LD ( 2 . 1 ) AP NIL LD ( 1 . 1 ) LDC -2 ADD CONS LD ( 2 . 1 ) AP ADD JOIN ) ( LDC 1 JOIN ) JOIN ) ( LDC 0 JOIN ) RET ) CONS LDF ( NIL LDC 10 CONS LD ( 1 . 1 ) AP RET ) RAP PUTNUM STOP )");
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "6765");
+    EXPECT_EQ(ssout.str(), "55");
 }

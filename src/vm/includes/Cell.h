@@ -5,8 +5,8 @@
 #ifndef PSIL_CELL_H
 #define PSIL_CELL_H
 
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 
 enum class CellType {
     INT,
@@ -19,6 +19,8 @@ struct Cell {
     virtual ~Cell() = 0;
 
     CellType _type;
+
+    bool live = false;
 };
 
 struct IntCell : public Cell {
@@ -60,7 +62,6 @@ struct CommandCell : public IntCell {
         assert((_val > 0 && static_cast<CommandNum>(_val) <= CommandNum::END));
         return static_cast<CommandNum>(_val);
     }
-
 };
 
 struct ConsCell : public Cell {
@@ -74,4 +75,4 @@ struct ConsCell : public Cell {
     Cell *_cdr = nullptr;
 };
 
-#endif //PSIL_CELL_H
+#endif//PSIL_CELL_H
