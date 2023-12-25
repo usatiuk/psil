@@ -7,23 +7,23 @@
 #include <ranges>
 #include <stack>
 
+#include "Command.h"
+#include "ConsUtils.h"
+#include "MemoryContext.h"
 #include "VM.h"
 
 Parser::Parser(VM &vm) : _vm(vm) {}
 
 void Parser::loadSecd(std::string_view input) {
     _tokenizer.load(input);
-    std::stack<Cell *> out;
 
-    compileBody([&out](Cell *cmd) { out.emplace(cmd); });
+    MCHandle out(ConsUtils::cons(nullptr, nullptr));
 
-    while (!out.empty()) {
-        this->_vm.appendCommand(out.top());
-        out.pop();
-    }
+    compileBody([&out](MCHandle cmd) { ConsUtils::append(out, cmd); });
+    _vm.loadControl(out);
 }
 
-void Parser::compileBody(const std::function<void(Cell *)> &sink) {
+void Parser::compileBody(const std::function<void(MCHandle)> &sink) {
     auto token = _tokenizer.getNext();
     if (token != "(") throw std::invalid_argument("Expected (");
 
@@ -31,84 +31,62 @@ void Parser::compileBody(const std::function<void(Cell *)> &sink) {
         token = _tokenizer.getNext();
 
         if (token == "NIL") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::NIL));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
         } else if (token == "LDC") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::LDC));
-            sink(_vm.makeCell<IntCell>(std::stoi(_tokenizer.getNext())));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+            sink(ConsUtils::makeIntCell(std::stoi(_tokenizer.getNext())));
         } else if (token == "LD") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::LD));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
             if (_tokenizer.getNext() != "(") throw std::invalid_argument("Expected (");
             int64_t frame = std::stoi(_tokenizer.getNext());
             if (_tokenizer.getNext() != ".") throw std::invalid_argument("Expected .");
             int64_t loc = std::stoi(_tokenizer.getNext());
             if (_tokenizer.getNext() != ")") throw std::invalid_argument("Expected )");
-            sink(_vm.makeCell<ConsCell>(_vm.makeCell<IntCell>(frame), _vm.makeCell<IntCell>(loc)));
+            sink(ConsUtils::cons(ConsUtils::makeIntCell(frame), ConsUtils::makeIntCell(loc)));
         } else if (token == "SEL") {
-            std::stack<Cell *> outt;
-            compileBody([&outt](Cell *cmd) { outt.emplace(cmd); });
-            std::stack<Cell *> outf;
-            compileBody([&outf](Cell *cmd) { outf.emplace(cmd); });
+            MCHandle outt(ConsUtils::cons(nullptr, nullptr));
+            compileBody([&outt](MCHandle cmd) { ConsUtils::append(outt, cmd); });
+            MCHandle outf(ConsUtils::cons(nullptr, nullptr));
+            compileBody([&outf](MCHandle cmd) { ConsUtils::append(outf, cmd);; });
 
-            if (outt.empty()) throw std::invalid_argument("Function body empty");
-            if (outf.empty()) throw std::invalid_argument("Function body empty");
+            if (ConsUtils::car(outt).get() == nullptr) throw std::invalid_argument("Function body empty");
+            if (ConsUtils::cdr(outt).get() == nullptr) throw std::invalid_argument("Function body empty");
 
-            ConsCell *ttop = _vm.makeCell<ConsCell>(outt.top());
-            outt.pop();
-            while (!outt.empty()) {
-                _vm.push(ttop, outt.top());
-                outt.pop();
-            }
-
-            ConsCell *ftop = _vm.makeCell<ConsCell>(outf.top());
-            outf.pop();
-            while (!outf.empty()) {
-                _vm.push(ftop, outf.top());
-                outf.pop();
-            }
-
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::SEL));
-            sink(ttop);
-            sink(ftop);
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::SEL)));
+            sink(outt);
+            sink(outf);
         } else if (token == "JOIN") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::JOIN));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
         } else if (token == "LDF") {
-            std::stack<Cell *> out;
+            MCHandle outt(ConsUtils::cons(nullptr, nullptr));
+            compileBody([&outt](MCHandle cmd) { ConsUtils::append(outt, cmd); });
 
-            compileBody([&out](Cell *cmd) { out.emplace(cmd); });
+            if (ConsUtils::car(outt).get() == nullptr) throw std::invalid_argument("Function body empty");
 
-            if (out.empty()) throw std::invalid_argument("Function body empty");
-
-            ConsCell *fntop = _vm.makeCell<ConsCell>(out.top());
-            out.pop();
-
-            while (!out.empty()) {
-                _vm.push(fntop, out.top());
-                out.pop();
-            }
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::LDF));
-            sink(fntop);
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDF)));
+            sink(outt);
         } else if (token == "AP") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::AP));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
         } else if (token == "RET") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::RET));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::RET)));
         } else if (token == "DUM") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::DUM));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::DUM)));
         } else if (token == "RAP") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::RAP));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::RAP)));
         } else if (token == "STOP") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::STOP));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::STOP)));
         } else if (token == "ADD") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::ADD));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
         } else if (token == "SUB") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::SUB));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::SUB)));
         } else if (token == "READCHAR") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::READCHAR));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::READCHAR)));
         } else if (token == "PUTCHAR") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::PUTCHAR));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
         } else if (token == "PUTNUM") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::PUTNUM));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTNUM)));
         } else if (token == "CONS") {
-            sink(_vm.makeCell<CommandCell>(CommandCell::CommandNum::CONS));
+            sink(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
         } else {
             if (token != ")")
                 throw std::invalid_argument("Unknown token " + token);
@@ -127,11 +105,9 @@ std::string_view Parser::Tokenizer::peek() const {
 }
 
 void Parser::Tokenizer::load(std::string_view input) {
-    for (const auto &w: input
-                        | std::views::split(' ')
-                        | std::views::transform([](auto &&rng) {
-        return std::string_view(&*rng.begin(), std::ranges::distance(rng));
-    })) {
+    for (const auto &w: input | std::views::split(' ') | std::views::transform([](auto &&rng) {
+                            return std::string_view(&*rng.begin(), std::ranges::distance(rng));
+                        })) {
         _tokens.emplace(w);
     }
 }
@@ -139,4 +115,3 @@ void Parser::Tokenizer::load(std::string_view input) {
 bool Parser::Tokenizer::empty() const {
     return _tokens.empty();
 }
-

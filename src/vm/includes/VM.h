@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Cell.h"
+#include "MemoryContext.h"
 
 class VM {
 public:
@@ -18,61 +19,21 @@ public:
 
     void run();
 
+    void loadControl(const MCHandle &h) { _c = h; }
+
     void step();
 
-    //    template<typename T>
-    //    void appendCommand(T cell) {
-    //        push(_c, makeCell<T>(std::move(cell)));
-    //    }
-
-    template<typename T>
-    void appendCommand(T *cell) {
-        push(_c, cell);
-    }
-
-    template<typename CT, typename... Args>
-    CT *makeCell(Args... args) {
-        return static_cast<CT *>(_cells.emplace_back(new CT(std::forward<Args>(args)...)));
-    }
-
-    Cell *car(ConsCell *cell) {
-        return cell->_car;
-    }
-
-    Cell *cdr(ConsCell *cell) {
-        return cell->_cdr;
-    }
-
-    ConsCell *cons(Cell *car, Cell *cdr) {
-        return dynamic_cast<ConsCell *>(makeCell<ConsCell>(car, cdr));
-    }
-
-    Cell *pop(ConsCell *&what) {
-        Cell *ret = what->_car;
-        what = dynamic_cast<ConsCell *>(cdr(what));
-        return ret;
-    }
-
-    Cell *push(ConsCell *&what, Cell *toAppend) {
-        what = cons(toAppend, what);
-        return what;
-    }
-
-    uint64_t cellCount() const;
-
 private:
-    std::list<Cell *> _cells;
-    ConsCell *_s = nullptr;
-    ConsCell *_e = nullptr;
-    ConsCell *_c = nullptr;
-    ConsCell *_d = nullptr;
+    MCHandle _s = nullptr;
+    MCHandle _e = nullptr;
+    MCHandle _c = nullptr;
+    MCHandle _d = nullptr;
     bool _stop = false;
 
     std::istream &_instream;
     std::ostream &_outstream;
 
-    void gc();
+    //    void gc();
 };
-
 
 #endif//PSIL_VM_H

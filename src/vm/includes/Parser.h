@@ -5,9 +5,12 @@
 #ifndef PSIL_PARSER_H
 #define PSIL_PARSER_H
 
-#include <string_view>
-#include <string>
 #include <queue>
+#include <string>
+#include <string_view>
+
+
+#include "MemoryContext.h"
 
 class VM;
 
@@ -20,8 +23,7 @@ public:
     void loadSecd(std::string_view input);
 
 private:
-
-    void compileBody(const std::function<void(Cell *)> &sink);
+    void compileBody(const std::function<void(MCHandle)> &sink);
 
     VM &_vm;
 
@@ -43,4 +45,4 @@ private:
 };
 
 
-#endif //PSIL_PARSER_H
+#endif//PSIL_PARSER_H
