@@ -29,25 +29,6 @@ MemoryContext::~MemoryContext() {
     _gc_thread.join();
 }
 
-MemoryContext::Handle::Handle(Cell *target) : _target(target) {
-    if (target != nullptr)
-        CURRENT_MC.load()->add_root(target);
-}
-
-MemoryContext::Handle::~Handle() {
-    if (_target != nullptr)
-        CURRENT_MC.load()->remove_root(_target);
-}
-
-MemoryContext::Handle::Handle(MemoryContext::Handle const &other) : _target(other._target) {
-    if (_target != nullptr)
-        CURRENT_MC.load()->add_root(_target);
-}
-
-MemoryContext::Handle &MemoryContext::Handle::operator=(MemoryContext::Handle other) {
-    std::swap(_target, other._target);
-    return *this;
-}
 
 void MemoryContext::add_root(Cell *c) {
     {
@@ -118,7 +99,6 @@ void MemoryContext::gc_thread_entry() {
                     }
                     _cells.insert(temp_cells.begin(), temp_cells.end());
                 }
-                _cells_num = _cells.size();
 
 
                 for (auto const &r: new_roots) {
@@ -205,6 +185,7 @@ void MemoryContext::gc_thread_entry() {
 
                 stop = std::chrono::high_resolution_clock::now();
                 std::cerr << "Sweep time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+                _cells_num = _cells.size();
                 std::cerr << "GC Freed " << freed << " cells left: " << _cells_num << " \n";
             }
 

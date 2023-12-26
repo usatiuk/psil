@@ -63,7 +63,6 @@ TEST(VMWithParserTest, RecFunction) {
     }
     mc.request_gc_and_wait();
     mc.request_gc_and_wait();
-    mc.request_gc_and_wait();
     EXPECT_EQ(mc.cell_count(), 0);
     ssout.flush();
     EXPECT_EQ(ssout.str(), "6765");

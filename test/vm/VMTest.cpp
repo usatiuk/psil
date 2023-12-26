@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "ConsUtils.h"
 #include "VM.h"
 
 TEST(VMTest, BasicHello) {
@@ -9,12 +8,12 @@ TEST(VMTest, BasicHello) {
     {
         MemoryContext mc;
         VM vm(ssin, ssout);
-        MCHandle newc(ConsUtils::cons(nullptr, nullptr));
-        ConsUtils::append(newc, ConsUtils::makeStrCell("NIL"));
-        ConsUtils::append(newc, ConsUtils::makeStrCell("LDC"));
-        ConsUtils::append(newc, ConsUtils::makeNumCell('h'));
-        ConsUtils::append(newc, ConsUtils::makeStrCell("PUTCHAR"));
-        ConsUtils::append(newc, ConsUtils::makeStrCell("STOP"));
+        Handle newc(Handle::cons(nullptr, nullptr));
+        Handle::append(newc, Handle::makeStrCell("NIL"));
+        Handle::append(newc, Handle::makeStrCell("LDC"));
+        Handle::append(newc, Handle::makeNumCell('h'));
+        Handle::append(newc, Handle::makeStrCell("PUTCHAR"));
+        Handle::append(newc, Handle::makeStrCell("STOP"));
         vm.loadControl(newc);
         vm.run();
     }

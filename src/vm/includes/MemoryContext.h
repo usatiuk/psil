@@ -16,10 +16,13 @@
 #include <thread>
 
 #include "Cell.h"
+#include "Handle.h"
+
+class Handle;
 
 class MemoryContext {
 public:
-    class Handle;
+    friend Handle;
 
     MemoryContext();
     ~MemoryContext();
@@ -73,25 +76,6 @@ public:
         return newc;
     }
 
-    class Handle {
-    public:
-        Handle(Cell *target);
-        ~Handle();
-
-        Handle(Handle const &other);
-        Handle &operator=(Handle other);
-
-        Cell *operator->() const { return _target; }
-        Cell &operator*() const { return *_target; }
-        Cell *get() const noexcept { return _target; }
-
-        bool operator==(const Handle &rhs) const {
-            return _target == rhs._target;
-        }
-
-    private:
-        Cell *_target = nullptr;
-    };
 
     void request_gc_and_wait() {
         std::unique_lock l(_gc_done_m);
@@ -192,8 +176,6 @@ private:
     std::thread _gc_thread;
     std::atomic<bool> _gc_thread_stop = false;
 };
-
-using MCHandle = MemoryContext::Handle;
 
 extern std::atomic<MemoryContext *> CURRENT_MC;
 

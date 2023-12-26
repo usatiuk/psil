@@ -8,7 +8,6 @@
 #include <ranges>
 #include <stack>
 
-#include "ConsUtils.h"
 #include "MemoryContext.h"
 #include "VM.h"
 
@@ -17,24 +16,23 @@ void Parser::loadStr(std::string_view input) {
     _tokenizer.load(input);
 }
 
-MCHandle Parser::parseExpr() {
+Handle Parser::parseExpr() {
     while (!_tokenizer.empty()) {
         std::string token = std::string(_tokenizer.peek());
         if (token == "(") {
             _tokenizer.getNext();
-            MCHandle out(ConsUtils::cons(nullptr, nullptr));
+            Handle out(Handle::cons(nullptr, nullptr));
             while (token != ")") {
                 if (token == ".") {
                     _tokenizer.getNext();
 
-                    ConsUtils::setcdr(out, parseExpr());
+                    out.setcdr(parseExpr());
 
-                    if (_tokenizer.getNext() != ")")
-                        throw std::invalid_argument("Missing ) after pair");
+                    if (_tokenizer.getNext() != ")") throw std::invalid_argument("Missing ) after pair");
 
                     return out;
                 }
-                ConsUtils::append(out, parseExpr());
+                Handle::append(out, parseExpr());
                 token = _tokenizer.peek();
             }
             _tokenizer.getNext();
@@ -43,9 +41,9 @@ MCHandle Parser::parseExpr() {
             token = _tokenizer.getNext();
             try {
                 CellValType val = std::stoi(token);
-                return ConsUtils::makeNumCell(val);
+                return Handle::makeNumCell(val);
             } catch (...) {
-                return ConsUtils::makeStrCell(token);
+                return Handle::makeStrCell(token);
             }
         }
     }

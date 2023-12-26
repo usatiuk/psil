@@ -4,36 +4,31 @@
 
 #include <gtest/gtest.h>
 
-#include "ConsUtils.h"
 #include "MemoryContext.h"
-
-using namespace ConsUtils;
 
 TEST(GCTest, GCTest) {
     MemoryContext mc;
     {
-        MCHandle c = cons(nullptr, nullptr);
+        Handle c = Handle::cons(nullptr, nullptr);
         mc.request_gc_and_wait();
-        append(c, makeNumCell(1));
-        append(c, makeNumCell(2));
+        Handle::append(c, Handle::makeNumCell(1));
+        Handle::append(c, Handle::makeNumCell(2));
         mc.request_gc_and_wait();
-        EXPECT_EQ(val(car(c)), 1);
-        EXPECT_EQ(val(car(cdr(c))), 2);
+        EXPECT_EQ(c.car().val(), 1);
+        EXPECT_EQ(c.cdr().car().val(), 2);
     }
-    mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     EXPECT_EQ(mc.cell_count(), 0);
     {
-        MCHandle c = cons(nullptr, nullptr);
+        Handle c = Handle::cons(nullptr, nullptr);
         mc.request_gc_and_wait();
-        push(c, makeNumCell(1));
-        push(c, makeNumCell(2));
+        Handle::push(c, Handle::makeNumCell(1));
+        Handle::push(c, Handle::makeNumCell(2));
         mc.request_gc_and_wait();
-        EXPECT_EQ(val(car(c)), 2);
-        EXPECT_EQ(val(car(cdr(c))), 1);
+        EXPECT_EQ(c.car().val(), 2);
+        EXPECT_EQ(c.cdr().car().val(), 1);
     }
-    mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     EXPECT_EQ(mc.cell_count(), 0);
@@ -42,13 +37,12 @@ TEST(GCTest, GCTest) {
 TEST(GCTest, GCTestAppend) {
     MemoryContext mc;
     for (int i = 0; i < 25000; i++) {
-        MCHandle c = cons(nullptr, nullptr);
+        Handle c = Handle::cons(nullptr, nullptr);
         mc.request_gc();
-        append(c, makeNumCell(1));
+        Handle::append(c, Handle::makeNumCell(1));
         mc.request_gc();
-        EXPECT_EQ(val(car(c)), 1);
+        EXPECT_EQ(c.car().val(), 1);
     }
-    mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     EXPECT_EQ(mc.cell_count(), 0);
@@ -56,18 +50,17 @@ TEST(GCTest, GCTestAppend) {
 TEST(GCTest, GCTestPop) {
     MemoryContext mc;
     {
-        MCHandle c = cons(nullptr, nullptr);
+        Handle c = Handle::cons(nullptr, nullptr);
         static constexpr int test_size = 20000;
         for (int i = 0; i < test_size; i++) {
             mc.request_gc();
-            push(c, makeNumCell(i));
+            Handle::push(c, Handle::makeNumCell(i));
         }
         for (int i = test_size - 1; i >= 0; i--) {
             mc.request_gc();
-            EXPECT_EQ(i, val(pop(c)));
+            EXPECT_EQ(i, Handle::pop(c).val());
         }
     }
-    mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     EXPECT_EQ(mc.cell_count(), 0);
@@ -75,17 +68,33 @@ TEST(GCTest, GCTestPop) {
 
 TEST(GCTest, GCTestAppend2) {
     MemoryContext mc;
-    MCHandle c = cons(nullptr, nullptr);
+    Handle c = Handle::cons(nullptr, nullptr);
     static constexpr int test_size = 2000;
     for (int i = 0; i < test_size; i++) {
         mc.request_gc();
-        append(c, makeNumCell(i));
+        Handle::append(c, Handle::makeNumCell(i));
     }
     for (int i = 0; i < test_size; i++) {
         mc.request_gc();
-        EXPECT_EQ(i, val(pop(c)));
+        EXPECT_EQ(i, Handle::pop(c).val());
     }
     mc.request_gc_and_wait();
+    mc.request_gc_and_wait();
+    EXPECT_EQ(mc.cell_count(), 0);
+}
+
+TEST(GCTest, GCTestAppend3) {
+    MemoryContext mc;
+    for (int i = 0; i < 250000; i++) {
+        Handle c = Handle::cons(nullptr, nullptr);
+        Handle::append(c, Handle::makeNumCell(1));
+        Handle::append(c, Handle::makeNumCell(2));
+        mc.request_gc();
+        Handle n = c.cdr();
+        c.setcdr(nullptr);
+        EXPECT_EQ(n.car().val(), 2);
+        EXPECT_EQ(c.car().val(), 1);
+    }
     mc.request_gc_and_wait();
     mc.request_gc_and_wait();
     EXPECT_EQ(mc.cell_count(), 0);
