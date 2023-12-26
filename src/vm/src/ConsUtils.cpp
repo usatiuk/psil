@@ -40,13 +40,15 @@ MCHandle ConsUtils::makeStrCell(std::string val) {
 }
 
 void ConsUtils::setcar(const MCHandle &to, const MCHandle &car) {
-    CURRENT_MC.load()->run_dirty(to, [&] {
+    CURRENT_MC.load()->run_dirty<void>([&](std::function<void(Cell *)> dirty) -> void {
+        dirty(car.get());
         dynamic_cast<ConsCell &>(*to)._car = car.get();
     });
 }
 
 void ConsUtils::setcdr(const MCHandle &to, const MCHandle &cdr) {
-    CURRENT_MC.load()->run_dirty(to, [&] {
+    CURRENT_MC.load()->run_dirty<void>([&](std::function<void(Cell *)> dirty) -> void {
+        dirty(cdr.get());
         dynamic_cast<ConsCell &>(*to)._cdr = cdr.get();
     });
 }

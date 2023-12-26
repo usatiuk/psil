@@ -65,15 +65,6 @@ void MemoryContext::remove_root(Cell *c) {
     }
 }
 
-void MemoryContext::run_dirty(const MemoryContext::Handle &h, std::function<void()> f) {
-    {
-        std::lock_guard l(_gc_dirty_notif_queue_lock);
-        //        std::cerr << "dirtied: " << h.get() << "\n";
-        _gc_dirty_notif_queue.emplace(h.get());
-        f();
-    }
-}
-
 void MemoryContext::gc_thread_entry() {
     while (true) {
         {
@@ -188,13 +179,15 @@ void MemoryContext::gc_thread_entry() {
                     if (!l->live) {
                         freed += 1;
 
-                        //                        if (l->_type == CellType::NUMATOM) {
-                        //                            std::cerr << "deleting num: " << l << "\n";
-                        //                            _numatom_index.erase(dynamic_cast<NumAtomCell &>(*l)._val);
-                        //                        } else if (l->_type == CellType::STRATOM) {
-                        //                            std::cerr << "deleting str: " << l << "\n";
-                        //                            _stratom_index.erase(dynamic_cast<StrAtomCell &>(*l)._val);
-                        //                        }
+                        if (l->_type == CellType::NUMATOM) {
+                            std::lock_guard il(_indexes_lock);
+                            //                            std::cerr << "deleting num: " << l << "\n";
+                            _numatom_index.erase(dynamic_cast<NumAtomCell &>(*l)._val);
+                        } else if (l->_type == CellType::STRATOM) {
+                            std::lock_guard il(_indexes_lock);
+                            //                            std::cerr << "deleting str: " << l << "\n";
+                            _stratom_index.erase(dynamic_cast<StrAtomCell &>(*l)._val);
+                        }
 
                         assert(!_roots.contains(l));
                         //                        std::cerr << "deleting: " << l << "\n";

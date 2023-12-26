@@ -29,39 +29,49 @@ public:
         return alloc_cell<CT>(std::forward<Args>(args)...);
     }
 
-    //    template<>
-    //    Handle create_cell<NumAtomCell>(CellValType val) {
-    //        {
-    //            std::lock_guard l(_cells_lock);
-    //            if (_numatom_index.contains(val)) {
-    //                _numatom_index.at(val)->live = true;
-    //                return _numatom_index.at(val);
-    //            }
-    //        }
-    //        Handle newc = alloc_cell<NumAtomCell>(val);
-    //        {
-    //            std::lock_guard l(_cells_lock);
-    //            _numatom_index.emplace(val, newc.get());
-    //        }
-    //        return newc;
-    //    }
-    //
-    //    template<>
-    //    Handle create_cell<StrAtomCell>(std::string val) {
-    //        {
-    //            std::lock_guard l(_cells_lock);
-    //            if (_stratom_index.contains(val)) {
-    //                _stratom_index.at(val)->live = true;
-    //                return _stratom_index.at(val);
-    //            }
-    //        }
-    //        Handle newc = alloc_cell<StrAtomCell>(val);
-    //        {
-    //            std::lock_guard l(_cells_lock);
-    //            _stratom_index.emplace(std::move(val), newc.get());
-    //        }
-    //        return newc;
-    //    }
+    template<>
+    Handle create_cell<NumAtomCell>(CellValType val) {
+        std::optional<Handle> ret = run_dirty<std::optional<Handle>>([&](std::function<void(Cell *)> dirty) -> std::optional<Handle> {
+            std::lock_guard il(_indexes_lock);
+            if (_numatom_index.contains(val)) {
+                dirty(_numatom_index.at(val));
+                return _numatom_index.at(val);
+            } else {
+                return std::nullopt;
+            }
+        });
+
+        if (ret.has_value()) return *ret;
+
+        Handle newc = alloc_cell<NumAtomCell>(val);
+        {
+            std::lock_guard il(_indexes_lock);
+            _numatom_index.emplace(val, newc.get());
+        }
+        return newc;
+    }
+
+    template<>
+    Handle create_cell<StrAtomCell>(std::string val) {
+        std::optional<Handle> ret = run_dirty<std::optional<Handle>>([&](std::function<void(Cell *)> dirty) -> std::optional<Handle> {
+            std::lock_guard il(_indexes_lock);
+            if (_stratom_index.contains(val)) {
+                dirty(_stratom_index.at(val));
+                return _stratom_index.at(val);
+            } else {
+                return std::nullopt;
+            }
+        });
+
+        if (ret.has_value()) return *ret;
+
+        Handle newc = alloc_cell<StrAtomCell>(val);
+        {
+            std::lock_guard il(_indexes_lock);
+            _stratom_index.emplace(val, newc.get());
+        }
+        return newc;
+    }
 
     class Handle {
     public:
@@ -76,16 +86,7 @@ public:
         Cell *get() const noexcept { return _target; }
 
         bool operator==(const Handle &rhs) const {
-            if (_target == rhs._target) {
-                return true;
-            } else if ((_target != nullptr && rhs._target != nullptr) && (_target->_type == rhs._target->_type)) {
-                if (_target->_type == CellType::NUMATOM) {
-                    return dynamic_cast<NumAtomCell &>(*_target)._val == dynamic_cast<NumAtomCell &>(*rhs._target)._val;
-                } else if (_target->_type == CellType::STRATOM) {
-                    return dynamic_cast<StrAtomCell &>(*_target)._val == dynamic_cast<StrAtomCell &>(*rhs._target)._val;
-                }
-            }
-            return false;
+            return _target == rhs._target;
         }
 
     private:
@@ -112,7 +113,11 @@ public:
         return _cells_num;
     }
 
-    void run_dirty(const Handle &h, std::function<void()> f);
+    template<typename R>
+    R run_dirty(const std::function<R(std::function<void(Cell *)>)> &f) {
+        std::lock_guard l(_gc_dirty_notif_queue_lock);
+        return f([&](Cell *c) { _gc_dirty_notif_queue.emplace(c); });
+    }
 
 private:
     template<typename CT, typename... Args>
@@ -160,6 +165,8 @@ private:
     std::set<Cell *> _cells;
     std::atomic<size_t> _cells_num = 0;
     std::set<Cell *> _temp_cells;
+
+    std::mutex _indexes_lock;
     std::unordered_map<CellValType, Cell *> _numatom_index;
     std::unordered_map<std::string, Cell *> _stratom_index;
 
