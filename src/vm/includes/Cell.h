@@ -23,7 +23,7 @@ struct Cell {
     virtual ~Cell() = 0;
 
     CellType _type;
-    bool live = false;
+    std::atomic<bool> live = false;
 };
 
 struct NumAtomCell : public Cell {
@@ -45,8 +45,8 @@ struct ConsCell : public Cell {
     explicit ConsCell(Cell *car) : Cell(CellType::CONS), _car(car) {}
     ConsCell(Cell *car, Cell *cdr) : Cell(CellType::CONS), _car(car), _cdr(cdr) {}
 
-    Cell *_car = nullptr;
-    Cell *_cdr = nullptr;
+    std::atomic<Cell *> _car = nullptr;
+    std::atomic<Cell *> _cdr = nullptr;
 };
 
 #endif//PSIL_CELL_H

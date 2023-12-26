@@ -17,19 +17,18 @@ MCHandle ConsUtils::pop(MCHandle &from) {
     return ret;
 }
 
-MCHandle ConsUtils::push(MCHandle &to, const MCHandle &what) {
+void ConsUtils::push(MCHandle &to, const MCHandle &what) {
     to = cons(what, to);
-    return to;
 }
 
 void ConsUtils::append(MCHandle to, const MCHandle &what) {
     assert(to.get() != nullptr);
     if (car(to).get() == nullptr) {
-        dynamic_cast<ConsCell &>(*to)._car = what.get();
+        setcar(to, what);
         return;
     }
-    while (dynamic_cast<ConsCell &>(*to)._cdr != nullptr) to = cdr(to);
-    dynamic_cast<ConsCell &>(*to)._cdr = cons(what, nullptr).get();
+    while (cdr(to).get() != nullptr) to = cdr(to);
+    setcdr(to, cons(what, nullptr));
 }
 
 MCHandle ConsUtils::makeNumCell(int64_t val) {
@@ -41,9 +40,13 @@ MCHandle ConsUtils::makeStrCell(std::string val) {
 }
 
 void ConsUtils::setcar(const MCHandle &to, const MCHandle &car) {
-    dynamic_cast<ConsCell &>(*to)._car = car.get();
+    CURRENT_MC.load()->run_dirty(to, [&] {
+        dynamic_cast<ConsCell &>(*to)._car = car.get();
+    });
 }
 
 void ConsUtils::setcdr(const MCHandle &to, const MCHandle &cdr) {
-    dynamic_cast<ConsCell &>(*to)._cdr = cdr.get();
+    CURRENT_MC.load()->run_dirty(to, [&] {
+        dynamic_cast<ConsCell &>(*to)._cdr = cdr.get();
+    });
 }

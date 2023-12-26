@@ -54,8 +54,6 @@ private:
     MCHandle PUTNUM = ConsUtils::makeStrCell("PUTNUM");
 
     MCHandle CONS = ConsUtils::makeStrCell("CONS");
-
-    //    void gc();
 };
 
 #endif//PSIL_VM_H

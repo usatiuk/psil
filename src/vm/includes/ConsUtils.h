@@ -9,13 +9,13 @@
 #include "MemoryContext.h"
 
 namespace ConsUtils {
-    static inline MCHandle car(const MCHandle &cell) { return dynamic_cast<ConsCell &>(*cell)._car; }
-    static inline MCHandle cdr(const MCHandle &cell) { return dynamic_cast<ConsCell &>(*cell)._cdr; }
+    static inline MCHandle car(const MCHandle &cell) { return dynamic_cast<ConsCell &>(*cell)._car.load(); }
+    static inline MCHandle cdr(const MCHandle &cell) { return dynamic_cast<ConsCell &>(*cell)._cdr.load(); }
     static inline CellValType val(const MCHandle &cell) { return dynamic_cast<NumAtomCell &>(*cell)._val; }
     static inline std::string_view strval(const MCHandle &cell) { return dynamic_cast<StrAtomCell &>(*cell)._val; }
     MCHandle cons(const MCHandle &car, const MCHandle &cdr);
     MCHandle pop(MCHandle &from);
-    MCHandle push(MCHandle &to, const MCHandle &what);
+    void push(MCHandle &to, const MCHandle &what);
     void append(MCHandle to, const MCHandle &what);
     MCHandle makeNumCell(int64_t val);
     MCHandle makeStrCell(std::string val);

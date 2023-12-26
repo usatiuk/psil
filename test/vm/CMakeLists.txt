@@ -18,6 +18,17 @@ target_link_libraries(
         GTest::gtest_main
 )
 
+add_executable(
+        GCTest
+        GCTest.cpp
+)
+target_link_libraries(
+        GCTest
+        vm
+        GTest::gtest_main
+)
+
 include(GoogleTest)
 gtest_discover_tests(VMTest)
 gtest_discover_tests(VMWithParserTest)
+gtest_discover_tests(GCTest)

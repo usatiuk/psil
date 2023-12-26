@@ -86,7 +86,6 @@ void VM::step() {
         _s = s;
 
         push(_s, ret);
-        //            gc();
     } else if (poppedH == DUM) {
         push(_e, nullptr);
     } else if (poppedH == RAP) {
@@ -135,41 +134,3 @@ void VM::step() {
         assert(false);
     }
 }
-
-//void VM::gc() {
-//    std::function<void(ConsCell *)> visit = [&](ConsCell *c) {
-//        if (c == nullptr) return;
-//        if (c->live) return;
-//
-//        c->live = true;
-//
-//        if (c->_car) {
-//            if (c->_car->_type == CellType::CONS) visit(dynamic_cast<ConsCell *>(c->_car));
-//            c->_car->live = true;
-//        }
-//        if (c->_cdr) {
-//            if (c->_cdr->_type == CellType::CONS) visit(dynamic_cast<ConsCell *>(c->_cdr));
-//            c->_cdr->live = true;
-//        }
-//    };
-//    visit(_s);
-//    visit(_e);
-//    visit(_c);
-//    visit(_d);
-//
-//    uint64_t freed = 0;
-//
-//    _cells.remove_if([&](Cell *l) {
-//        bool ret = !l->live;
-//        if (ret) {
-//            freed += 1;
-//            delete l;
-//        } else {
-//            l->live = false;
-//        }
-//        return ret;
-//    });
-//
-//    std::cout << "GC Freed " << freed << std::endl;
-//}
-//
