@@ -7,9 +7,12 @@
 
 #include <cassert>
 #include <cstdint>
+#include <string>
+#include <utility>
 
 enum class CellType {
-    INT,
+    NUMATOM,
+    STRATOM,
     CONS
 };
 
@@ -23,11 +26,18 @@ struct Cell {
     bool live = false;
 };
 
-struct ValueCell : public Cell {
-    ValueCell() = delete;
-    explicit ValueCell(CellValType val) : Cell(CellType::INT), _val(val) {}
+struct NumAtomCell : public Cell {
+    NumAtomCell() = delete;
+    explicit NumAtomCell(CellValType val) : Cell(CellType::NUMATOM), _val(val) {}
 
     CellValType _val;
+};
+
+struct StrAtomCell : public Cell {
+    StrAtomCell() = delete;
+    explicit StrAtomCell(std::string val) : Cell(CellType::STRATOM), _val(std::move(val)) {}
+
+    std::string _val;
 };
 
 struct ConsCell : public Cell {

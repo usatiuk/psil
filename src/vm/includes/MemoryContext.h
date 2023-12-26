@@ -24,6 +24,28 @@ public:
         return cell;
     }
 
+    template<>
+    Handle create_cell<NumAtomCell>(CellValType val) {
+        if (numatom_index.contains(val))
+            return numatom_index.at(val);
+
+        NumAtomCell *cell = new NumAtomCell(val);
+        _cells.emplace_back(cell);
+        numatom_index.emplace(val, cell);
+        return cell;
+    }
+
+    template<>
+    Handle create_cell<StrAtomCell>(std::string val) {
+        if (stratom_index.contains(val))
+            return stratom_index.at(val);
+
+        StrAtomCell *cell = new StrAtomCell(std::move(val));
+        _cells.emplace_back(cell);
+        stratom_index.emplace(cell->_val, cell);
+        return cell;
+    }
+
     class Handle {
     public:
         Handle(Cell *target) : _target(target) {}
@@ -38,6 +60,8 @@ public:
 
 private:
     std::list<Cell *> _cells;
+    std::unordered_map<CellValType, Cell *> numatom_index;
+    std::unordered_map<std::string, Cell *> stratom_index;
 };
 
 using MCHandle = MemoryContext::Handle;

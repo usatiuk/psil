@@ -33,7 +33,7 @@ void ConsUtils::append(MCHandle to, const MCHandle &what) {
 }
 
 MCHandle ConsUtils::makeIntCell(int64_t val) {
-    return CURRENT_MC.load()->create_cell<ValueCell>(val);
+    return CURRENT_MC.load()->create_cell<NumAtomCell>(val);
 }
 
 void ConsUtils::setcar(const MCHandle &to, const MCHandle &car) {
