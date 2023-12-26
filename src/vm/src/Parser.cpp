@@ -4,6 +4,7 @@
 
 #include "Parser.h"
 
+#include <format>
 #include <ranges>
 #include <stack>
 
@@ -62,10 +63,23 @@ std::string_view Parser::Tokenizer::peek() const {
 }
 
 void Parser::Tokenizer::load(std::string_view input) {
-    for (const auto &w: input | std::views::split(' ') | std::views::transform([](auto &&rng) {
-                            return std::string_view(&*rng.begin(), std::ranges::distance(rng));
-                        })) {
-        _tokens.emplace(w);
+    std::string_view::size_type curpos = input.find_first_not_of(' ');
+
+    static const std::string alnum = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static const std::string special = "().";
+
+    while (curpos != std::string_view::npos) {
+        if (alnum.find(input.at(curpos)) != std::string::npos) {
+            std::string_view::size_type end = input.find_first_not_of(alnum, curpos);
+            _tokens.emplace(input.cbegin() + curpos, input.cbegin() + end);
+            curpos = end;
+        } else if (special.find(input.at(curpos)) != std::string::npos) {
+            _tokens.emplace(1, input.at(curpos));
+            curpos++;
+        } else {
+            throw std::invalid_argument("Unexpected symbol " + std::string(1, input.at(curpos)));
+        }
+        curpos = input.find_first_not_of(' ', curpos);
     }
 }
 

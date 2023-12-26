@@ -10,7 +10,7 @@ TEST(VMWithParserTest, BasicHello) {
         MemoryContext mc;
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("( LDC 104 PUTCHAR STOP )");
+        parser.loadStr("(LDC 104 PUTCHAR STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -26,7 +26,7 @@ TEST(VMWithParserTest, BasicBranch) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr(
-                "( LDC 1 SEL ( LDC 10 PUTNUM JOIN ) ( LDC 20 PUTNUM JOIN ) LDC 0 SEL ( LDC 30 PUTNUM JOIN ) ( LDC 40 PUTNUM JOIN ) STOP )");
+                "(LDC 1 SEL (LDC 10 PUTNUM JOIN) (LDC 20 PUTNUM JOIN) LDC 0 SEL (LDC 30 PUTNUM JOIN) (LDC 40 PUTNUM JOIN) STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -41,7 +41,7 @@ TEST(VMWithParserTest, BasicFunction) {
         MemoryContext mc;
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("( NIL LDC 1 CONS LDC 2 CONS LDF ( LD ( 1 . 1 ) LD ( 1 . 2 ) ADD RET ) AP PUTNUM STOP )");
+        parser.loadStr("(NIL LDC 1 CONS LDC 2 CONS LDF (LD (1 . 1) LD (1.2) ADD RET) AP PUTNUM STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
