@@ -32,10 +32,18 @@ void ConsUtils::append(MCHandle to, const MCHandle &what) {
     dynamic_cast<ConsCell &>(*to)._cdr = cons(what, nullptr).get();
 }
 
-MCHandle ConsUtils::makeIntCell(int64_t val) {
+MCHandle ConsUtils::makeNumCell(int64_t val) {
     return CURRENT_MC.load()->create_cell<NumAtomCell>(val);
+}
+
+MCHandle ConsUtils::makeStrCell(std::string val) {
+    return CURRENT_MC.load()->create_cell<StrAtomCell>(std::move(val));
 }
 
 void ConsUtils::setcar(const MCHandle &to, const MCHandle &car) {
     dynamic_cast<ConsCell &>(*to)._car = car.get();
+}
+
+void ConsUtils::setcdr(const MCHandle &to, const MCHandle &cdr) {
+    dynamic_cast<ConsCell &>(*to)._cdr = cdr.get();
 }

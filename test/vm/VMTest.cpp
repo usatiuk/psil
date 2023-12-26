@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include "Command.h"
 #include "ConsUtils.h"
 #include "VM.h"
 
@@ -11,11 +10,11 @@ TEST(VMTest, BasicHello) {
         MemoryContext mc;
         VM vm(ssin, ssout);
         MCHandle newc(ConsUtils::cons(nullptr, nullptr));
-        ConsUtils::append(newc, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
-        ConsUtils::append(newc, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-        ConsUtils::append(newc, ConsUtils::makeIntCell('h'));
-        ConsUtils::append(newc, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
-        ConsUtils::append(newc, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::STOP)));
+        ConsUtils::append(newc, ConsUtils::makeStrCell("NIL"));
+        ConsUtils::append(newc, ConsUtils::makeStrCell("LDC"));
+        ConsUtils::append(newc, ConsUtils::makeNumCell('h'));
+        ConsUtils::append(newc, ConsUtils::makeStrCell("PUTCHAR"));
+        ConsUtils::append(newc, ConsUtils::makeStrCell("STOP"));
         vm.loadControl(newc);
         vm.run();
     }
@@ -28,42 +27,42 @@ TEST(VMTest, BasicHello) {
 //    std::stringstream ssout;
 //    {
 //        VM vm(ssin, ssout);
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::STOP)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::STOP)));
 //
 //        // True branch true test
-//        ConsCell *tbtt = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
-//        vm.push(tbtt, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//        ConsCell *tbtt = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//        vm.push(tbtt, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
 //        vm.push(tbtt, vm.makeCell<IntCell>('1'));
-//        vm.push(tbtt, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(tbtt, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //
 //        // False branch true test
-//        ConsCell *fbtt = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
-//        vm.push(fbtt, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//        ConsCell *fbtt = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//        vm.push(fbtt, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
 //        vm.push(fbtt, vm.makeCell<IntCell>('2'));
-//        vm.push(fbtt, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(fbtt, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //
 //        // True branch false test
-//        ConsCell *tbft = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
-//        vm.push(tbft, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//        ConsCell *tbft = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//        vm.push(tbft, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
 //        vm.push(tbft, vm.makeCell<IntCell>('3'));
-//        vm.push(tbft, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(tbft, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //
 //        // False branch false test
-//        ConsCell *fbft = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
-//        vm.push(fbft, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//        ConsCell *fbft = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//        vm.push(fbft, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
 //        vm.push(fbft, vm.makeCell<IntCell>('4'));
-//        vm.push(fbft, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(fbft, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //
 //        vm.appendCommand(fbft);
 //        vm.appendCommand(tbft);
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::SEL)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::SEL)));
 //        vm.appendCommand(vm.makeCell<IntCell>(0));
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //        vm.appendCommand(fbtt);
 //        vm.appendCommand(tbtt);
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::SEL)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::SEL)));
 //        vm.appendCommand(vm.makeCell<IntCell>(1));
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //        vm.run();
 //    }
 //    ssout.flush();
@@ -75,23 +74,23 @@ TEST(VMTest, BasicHello) {
 //    std::stringstream ssout;
 //    {
 //        VM vm(ssin, ssout);
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::STOP)));
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::STOP)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
 //
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //
 //        // Add function
-//        ConsCell *addfn = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::RET)));
-//        vm.push(addfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//        ConsCell *addfn = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::RET)));
+//        vm.push(addfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //        vm.push(addfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(2)));
-//        vm.push(addfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//        vm.push(addfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
 //        vm.push(addfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//        vm.push(addfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//        vm.push(addfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
 //        vm.appendCommand(addfn);
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDF)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDF)));
 //        vm.appendCommand(
 //                vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<ConsCell>(vm.makeCell<IntCell>('2'))));
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //        vm.run();
 //    }
 //    ssout.flush();
@@ -103,140 +102,140 @@ TEST(VMTest, BasicHello) {
 //    std::stringstream ssout;
 //    {
 //        VM vm(ssin, ssout);
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::STOP)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::STOP)));
 //
-//        vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::RAP)));
+//        vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::RAP)));
 //
 //        // Fib function
-//        ConsCell *fibfn = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::RET)));
+//        ConsCell *fibfn = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::RET)));
 //
 //        // 0 case
-//        ConsCell *zcase = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//        ConsCell *zcase = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
 //        vm.push(zcase, vm.makeCell<IntCell>(0));
-//        vm.push(zcase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(zcase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //
 //        // 1 case
-//        ConsCell *ocase = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//        ConsCell *ocase = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
 //        vm.push(ocase, vm.makeCell<IntCell>(1));
-//        vm.push(ocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(ocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //
 //        // >1 case
-//        ConsCell *gocase = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//        ConsCell *gocase = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //        vm.push(gocase, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(2), vm.makeCell<IntCell>(1)));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
 //
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //        vm.push(gocase, vm.makeCell<IntCell>(-2));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //        vm.push(gocase, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //        vm.push(gocase, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(2), vm.makeCell<IntCell>(1)));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
 //
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //        vm.push(gocase, vm.makeCell<IntCell>(-1));
-//        vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//        vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //        vm.push(gocase, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
-//vm.push(gocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(gocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
 //// >=1 case
-//ConsCell *geocase = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
+//ConsCell *geocase = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::JOIN)));
 //vm.push(geocase, ocase);
 //vm.push(geocase, gocase);
-//vm.push(geocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::SEL)));
-//vm.push(geocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//vm.push(geocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::SEL)));
+//vm.push(geocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //vm.push(geocase, vm.makeCell<IntCell>(-1));
-//vm.push(geocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(geocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
 //vm.push(geocase, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(geocase, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(geocase, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
 //
 //vm.push(fibfn, zcase);
 //vm.push(fibfn, geocase);
-//vm.push(fibfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::SEL)));
+//vm.push(fibfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::SEL)));
 //vm.push(fibfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(fibfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(fibfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
 //
 //// Fib caller function
-//ConsCell *fibcallfn = vm.makeCell<ConsCell>(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::RET)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTNUM)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//ConsCell *fibcallfn = vm.makeCell<ConsCell>(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::RET)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTNUM)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>(' '));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //vm.push(fibcallfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>(10));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>('0'));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //vm.push(fibcallfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>(6));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>('0'));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //vm.push(fibcallfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>(5));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>('0'));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //vm.push(fibcallfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>(4));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::ADD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::PUTCHAR)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::ADD)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>('0'));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::AP)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::AP)));
 //vm.push(fibcallfn, vm.makeCell<ConsCell>(vm.makeCell<IntCell>(1), vm.makeCell<IntCell>(1)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LD)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LD)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
 //vm.push(fibcallfn, vm.makeCell<IntCell>(3));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDC)));
-//vm.push(fibcallfn, ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDC)));
+//vm.push(fibcallfn, ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
 //
 //vm.appendCommand(fibcallfn);
-//vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDF)));
+//vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDF)));
 //
-//vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::CONS)));
+//vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::CONS)));
 //vm.appendCommand(fibfn);
-//vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::LDF)));
-//vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::NIL)));
+//vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::LDF)));
+//vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::NIL)));
 //
-//vm.appendCommand(ConsUtils::makeIntCell(Command::cmd_to_int(Command::CommandNum::DUM)));
+//vm.appendCommand(ConsUtils::makeNumCell(Command::cmd_to_int(Command::CommandNum::DUM)));
 //vm.run();
 //}
 //ssout.flush();

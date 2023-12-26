@@ -34,6 +34,27 @@ private:
     std::istream &_instream;
     std::ostream &_outstream;
 
+    MCHandle NIL = ConsUtils::makeStrCell("NIL");
+    MCHandle LDC = ConsUtils::makeStrCell("LDC");
+    MCHandle LD = ConsUtils::makeStrCell("LD");
+    MCHandle SEL = ConsUtils::makeStrCell("SEL");
+    MCHandle JOIN = ConsUtils::makeStrCell("JOIN");
+    MCHandle LDF = ConsUtils::makeStrCell("LDF");
+    MCHandle AP = ConsUtils::makeStrCell("AP");
+    MCHandle RET = ConsUtils::makeStrCell("RET");
+    MCHandle DUM = ConsUtils::makeStrCell("DUM");
+    MCHandle RAP = ConsUtils::makeStrCell("RAP");
+    MCHandle STOP = ConsUtils::makeStrCell("STOP");
+
+    MCHandle ADD = ConsUtils::makeStrCell("ADD");
+    MCHandle SUB = ConsUtils::makeStrCell("SUB");
+
+    MCHandle READCHAR = ConsUtils::makeStrCell("READCHAR");
+    MCHandle PUTCHAR = ConsUtils::makeStrCell("PUTCHAR");
+    MCHandle PUTNUM = ConsUtils::makeStrCell("PUTNUM");
+
+    MCHandle CONS = ConsUtils::makeStrCell("CONS");
+
     //    void gc();
 };
 

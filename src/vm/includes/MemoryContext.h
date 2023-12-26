@@ -54,6 +54,10 @@ public:
         Cell &operator*() const { return *_target; }
         Cell *get() const noexcept { return _target; }
 
+        bool operator==(const Handle &rhs) const {
+            return _target == rhs._target;
+        }
+
     private:
         Cell *_target = nullptr;
     };

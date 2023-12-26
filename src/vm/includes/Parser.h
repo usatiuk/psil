@@ -18,15 +18,10 @@ struct Cell;
 
 class Parser {
 public:
-    explicit Parser(VM &vm);
-
-    void loadSecd(std::string_view input);
+    void loadStr(std::string_view input);
+    MCHandle parseExpr();
 
 private:
-    void compileBody(const std::function<void(MCHandle)> &sink);
-
-    VM &_vm;
-
     class Tokenizer {
     public:
         void load(std::string_view input);
