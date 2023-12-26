@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Cell.h"
+#include "ConsUtils.h"
 #include "MemoryContext.h"
 
 class VM {
@@ -24,10 +25,10 @@ public:
     void step();
 
 private:
-    MCHandle _s = nullptr;
-    MCHandle _e = nullptr;
-    MCHandle _c = nullptr;
-    MCHandle _d = nullptr;
+    MCHandle _s = ConsUtils::cons(nullptr, nullptr);
+    MCHandle _e = ConsUtils::cons(nullptr, nullptr);
+    MCHandle _c = ConsUtils::cons(nullptr, nullptr);
+    MCHandle _d = ConsUtils::cons(nullptr, nullptr);
     bool _stop = false;
 
     std::istream &_instream;

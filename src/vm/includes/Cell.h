@@ -9,10 +9,11 @@
 #include <cstdint>
 
 enum class CellType {
-    NIL,
     INT,
     CONS
 };
+
+using CellValType = int64_t;
 
 struct Cell {
     explicit Cell(CellType type) : _type(type) {}
@@ -24,9 +25,9 @@ struct Cell {
 
 struct ValueCell : public Cell {
     ValueCell() = delete;
-    explicit ValueCell(int64_t val) : Cell(CellType::INT), _val(val) {}
+    explicit ValueCell(CellValType val) : Cell(CellType::INT), _val(val) {}
 
-    int64_t _val;
+    CellValType _val;
 };
 
 struct ConsCell : public Cell {

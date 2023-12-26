@@ -10,6 +10,8 @@
 #include "ConsUtils.h"
 #include "VM.h"
 
+using namespace ConsUtils;
+
 VM::VM(std::istream &instream, std::ostream &outstream) : _instream(instream), _outstream(outstream) {}
 
 void VM::run() {
@@ -17,56 +19,49 @@ void VM::run() {
 }
 
 void VM::step() {
-    MCHandle poppedH = ConsUtils::pop(_c);
-    ValueCell &popped = dynamic_cast<ValueCell &>(*poppedH);
+    MCHandle poppedH = pop(_c);
 
-    switch (Command::int_to_cmd(popped._val)) {
+    switch (Command::int_to_cmd(val(poppedH))) {
         case Command::CommandNum::NIL: {
-            ConsUtils::push(_s, nullptr);
+            push(_s, nullptr);
             break;
         }
         case Command::CommandNum::LDC: {
-            ConsUtils::push(_s, ConsUtils::pop(_c));
+            push(_s, pop(_c));
             break;
         }
         case Command::CommandNum::LD: {
-            MCHandle poppedH2 = ConsUtils::pop(_c);
-            ConsCell &popped2 = dynamic_cast<ConsCell &>(*poppedH2);
+            MCHandle poppedH2 = pop(_c);
 
-            int64_t frame = dynamic_cast<ValueCell &>(*popped2._car)._val;
-            int64_t arg = dynamic_cast<ValueCell &>(*popped2._cdr)._val;
+            int64_t frame = val(car(poppedH2));
+            int64_t arg = val(cdr(poppedH2));
 
             assert(frame > 0);
             assert(arg > 0);
 
-            ConsCell *curFrame = dynamic_cast<ConsCell *>(_e.get());
-            assert(curFrame);
+            MCHandle curFrame = _e;
 
             for (int i = 1; i < frame; i++) {
-                curFrame = dynamic_cast<ConsCell *>(curFrame->_cdr);
-                assert(curFrame);
+                curFrame = cdr(curFrame);
             }
 
-            ConsCell *curArg = dynamic_cast<ConsCell *>(curFrame->_car);
-            assert(curArg);
+            MCHandle curArg = car(curFrame);
 
             for (int i = 1; i < arg; i++) {
-                curArg = dynamic_cast<ConsCell *>(curArg->_cdr);
-                assert(curArg);
+                curArg = cdr(curArg);
             }
 
-            ConsUtils::push(_s, curArg->_car);
+            push(_s, car(curArg));
             break;
         }
         case Command::CommandNum::SEL: {
-            MCHandle popped2H = ConsUtils::pop(_s);
-            ValueCell &popped2 = dynamic_cast<ValueCell &>(*popped2H);
+            MCHandle popped2H = pop(_s);
 
-            MCHandle ct = ConsUtils::pop(_c);
-            MCHandle cf = ConsUtils::pop(_c);
+            MCHandle ct = pop(_c);
+            MCHandle cf = pop(_c);
 
-            ConsUtils::push(_d, _c);
-            if (popped2._val > 0) {
+            push(_d, _c);
+            if (val(popped2H) > 0) {
                 _c = ct;
             } else {
                 _c = cf;
@@ -75,65 +70,66 @@ void VM::step() {
             break;
         }
         case Command::CommandNum::JOIN: {
-            _c = ConsUtils::pop(_d);
+            _c = pop(_d);
             break;
         }
         case Command::CommandNum::LDF: {
-            ConsUtils::push(_s, ConsUtils::cons(ConsUtils::pop(_c), _e));
+            push(_s, cons(pop(_c), _e));
             break;
         }
         case Command::CommandNum::AP: {
-            MCHandle closureH = ConsUtils::pop(_s);
-            MCHandle argsH = ConsUtils::pop(_s);
+            MCHandle closureH = pop(_s);
+            MCHandle argsH = pop(_s);
 
-            ConsUtils::push(_d, _s);
-            ConsUtils::push(_d, _e);
-            ConsUtils::push(_d, _c);
+            push(_d, _s);
+            push(_d, _e);
+            push(_d, _c);
 
-            _s = ConsUtils::cons(nullptr, nullptr);
-            _c = ConsUtils::car(closureH);
-            _e = ConsUtils::cdr(closureH);
-            ConsUtils::push(_e, argsH);
+            _s = cons(nullptr, nullptr);
+            _c = car(closureH);
+            _e = cdr(closureH);
+            push(_e, argsH);
             break;
         }
         case Command::CommandNum::RET: {
-            MCHandle c = ConsUtils::pop(_d);
-            MCHandle e = ConsUtils::pop(_d);
-            MCHandle s = ConsUtils::pop(_d);
+            MCHandle c = pop(_d);
+            MCHandle e = pop(_d);
+            MCHandle s = pop(_d);
 
-            MCHandle ret = ConsUtils::pop(_s);
+            MCHandle ret = pop(_s);
 
             _c = c;
             _e = e;
             _s = s;
 
-            ConsUtils::push(_s, ret);
+            push(_s, ret);
             //            gc();
             break;
         }
         case Command::CommandNum::DUM: {
-            ConsUtils::push(_e, nullptr);
+            push(_e, nullptr);
             break;
         }
         case Command::CommandNum::RAP: {
-            MCHandle closureH = ConsUtils::pop(_s);
-            MCHandle argsH = ConsUtils::pop(_s);
+            MCHandle closureH = pop(_s);
+            MCHandle argsH = pop(_s);
 
 
-            MCHandle origE = ConsUtils::cdr(_e);
+            MCHandle origE = cdr(_e);
 
-            ConsUtils::push(_d, _s);
-            ConsUtils::push(_d, origE);
-            ConsUtils::push(_d, _c);
+            push(_d, _s);
+            push(_d, origE);
+            push(_d, _c);
 
-            _s = ConsUtils::cons(nullptr, nullptr);
-            _c = ConsUtils::car(closureH);
-            _e = ConsUtils::cdr(closureH);
+            _s = cons(nullptr, nullptr);
+            _c = car(closureH);
+            _e = cdr(closureH);
 
-            MCHandle fnEnv = ConsUtils::cdr(closureH);
+            MCHandle fnEnv = cdr(closureH);
             assert(_e.get() == fnEnv.get());
-            ConsUtils::push(_e, argsH);
-            dynamic_cast<ConsCell &>(*fnEnv)._car = argsH.get();
+
+            push(_e, argsH);
+            setcar(fnEnv, argsH);
             break;
         }
         case Command::CommandNum::STOP: {
@@ -142,32 +138,32 @@ void VM::step() {
             break;
         }
         case Command::CommandNum::ADD: {
-            int64_t ret = dynamic_cast<ValueCell &>(*ConsUtils::pop(_s))._val + dynamic_cast<ValueCell &>(*ConsUtils::pop(_s))._val;
-            ConsUtils::push(_s, CURRENT_MC.load()->create_cell<ValueCell>(ret));
+            int64_t ret = val(pop(_s)) + val(pop(_s));
+            push(_s, makeIntCell(ret));
             break;
         }
         case Command::CommandNum::SUB: {
             break;
         }
         case Command::CommandNum::CONS: {
-            MCHandle h1 = ConsUtils::pop(_s);
-            MCHandle h2 = ConsUtils::pop(_s);
+            MCHandle h1 = pop(_s);
+            MCHandle h2 = pop(_s);
 
-            ConsUtils::push(_s, ConsUtils::cons(h1, h2));
+            push(_s, cons(h1, h2));
             break;
         }
         case Command::CommandNum::READCHAR: {
             char c;
             _instream >> c;
-            ConsUtils::push(_s, CURRENT_MC.load()->create_cell<ValueCell>(c));
+            push(_s, makeIntCell(c));
             break;
         }
         case Command::CommandNum::PUTCHAR: {
-            _outstream << (char) dynamic_cast<ValueCell &>(*ConsUtils::pop(_s))._val;
+            _outstream << (char) val(pop(_s));
             break;
         }
         case Command::CommandNum::PUTNUM: {
-            _outstream << dynamic_cast<ValueCell &>(*ConsUtils::pop(_s))._val;
+            _outstream << val(pop(_s));
             break;
         }
         case Command::CommandNum::END: {

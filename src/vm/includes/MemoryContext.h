@@ -26,7 +26,7 @@ public:
 
     class Handle {
     public:
-        Handle(Cell *target) : _target(target), _type(target ? target->_type : CellType::NIL) {}
+        Handle(Cell *target) : _target(target) {}
 
         Cell *operator->() const { return _target; }
         Cell &operator*() const { return *_target; }
@@ -34,7 +34,6 @@ public:
 
     private:
         Cell *_target = nullptr;
-        CellType _type;
     };
 
 private:

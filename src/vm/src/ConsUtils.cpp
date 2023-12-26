@@ -35,3 +35,7 @@ void ConsUtils::append(MCHandle to, const MCHandle &what) {
 MCHandle ConsUtils::makeIntCell(int64_t val) {
     return CURRENT_MC.load()->create_cell<ValueCell>(val);
 }
+
+void ConsUtils::setcar(const MCHandle &to, const MCHandle &car) {
+    dynamic_cast<ConsCell &>(*to)._car = car.get();
+}
