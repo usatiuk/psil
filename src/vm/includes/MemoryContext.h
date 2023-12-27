@@ -133,7 +133,7 @@ private:
         {
             std::lock_guard tmplg(_new_roots_lock);
             Handle ret(cell);
-            _temp_cells.emplace(cell);
+            _temp_cells.emplace_back(cell);
             if ((_cells_num + _temp_cells.size() + 1) >= (size_t) (_cell_limit / 2)) {
                 request_gc();
             }
@@ -145,10 +145,9 @@ private:
     void add_root(Cell *c);
     void remove_root(Cell *c);
 
-    std::mutex _cells_lock;
-    std::set<Cell *> _cells;
+    std::list<Cell *> _cells;
     std::atomic<size_t> _cells_num = 0;
-    std::set<Cell *> _temp_cells;
+    std::list<Cell *> _temp_cells;
 
     std::mutex _indexes_lock;
     std::unordered_map<CellValType, Cell *> _numatom_index;

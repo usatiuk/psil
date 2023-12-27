@@ -55,8 +55,8 @@ void MemoryContext::gc_thread_entry() {
         if (_gc_thread_stop) return;
 
         std::cerr << "gc start " << '\n';
+        auto gcstart = std::chrono::high_resolution_clock::now();
 
-        std::unordered_set<Cell *> seenroots;
         std::queue<Cell *> toVisit;
 
         auto visitAll = [&]() {
@@ -65,12 +65,9 @@ void MemoryContext::gc_thread_entry() {
                 toVisit.pop();
 
                 if (c == nullptr) continue;
-
-                if (!_cells.contains(c)) _cells.emplace(c);
-
                 if (c->live) continue;
-
                 c->live = true;
+
                 //                std::cerr << "processing c " << c << " " << static_cast<int>(c->_type) << "\n";
 
                 if (c->_type == CellType::CONS) {
@@ -86,116 +83,110 @@ void MemoryContext::gc_thread_entry() {
         };
 
         {
-            std::lock_guard cl(_cells_lock);
             auto start = std::chrono::high_resolution_clock::now();
+            decltype(_new_roots) new_roots;
             {
-                decltype(_new_roots) new_roots;
+                decltype(_temp_cells) temp_cells;
                 {
-                    decltype(_temp_cells) temp_cells;
-                    {
-                        std::lock_guard l(_new_roots_lock);
-                        std::swap(new_roots, _new_roots);
-                        std::swap(temp_cells, _temp_cells);
-                    }
-                    _cells.insert(temp_cells.begin(), temp_cells.end());
+                    std::lock_guard l(_new_roots_lock);
+                    std::swap(new_roots, _new_roots);
+                    std::swap(temp_cells, _temp_cells);
                 }
-
-
-                for (auto const &r: new_roots) {
-                    //                    std::cerr << "processing new " << r.first << " diff " << r.second << "\n";
-                    if (r.second == 0) continue;
-                    _roots[r.first] += r.second;
-                    if (_roots[r.first] <= 0)
-                        _roots.erase(r.first);
-                }
+                _cells.splice(_cells.end(), temp_cells);
             }
+
+
+            for (auto const &r: new_roots) {
+                //                    std::cerr << "processing new " << r.first << " diff " << r.second << "\n";
+                if (r.second == 0) continue;
+                _roots[r.first] += r.second;
+                if (_roots[r.first] <= 0)
+                    _roots.erase(r.first);
+            }
+
             auto stop = std::chrono::high_resolution_clock::now();
             std::cerr << "New roots time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+        }
 
-            assert(std::none_of(_cells.begin(), _cells.end(), [](const auto &p) { return p->live.load(); }));
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            std::for_each(_cells.begin(), _cells.end(), [&](Cell *c) {
+                c->live = false;
+            });
 
-            start = std::chrono::high_resolution_clock::now();
             for (const auto &r: _roots) {
                 //                std::cerr << "processing r " << r.first << " diff " << r.second << "\n";
-                seenroots.emplace(r.first);
                 toVisit.emplace(r.first);
             }
             visitAll();
-            stop = std::chrono::high_resolution_clock::now();
+            auto stop = std::chrono::high_resolution_clock::now();
             //            std::cerr << "Scanned " << _roots.size() << " roots" << std::endl;
             std::cerr << "Roots scan time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+        }
 
-            {
-                decltype(_gc_dirty_notif_queue) dirtied;
-                std::unique_lock dql(_gc_dirty_notif_queue_lock);
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+            decltype(_gc_dirty_notif_queue) dirtied;
+            std::unique_lock dql(_gc_dirty_notif_queue_lock);
+            std::swap(dirtied, _gc_dirty_notif_queue);
+
+            while (!dirtied.empty()) {
+                dql.unlock();
+                for (const auto &r: dirtied) {
+                    //                        std::cerr << "processing dirty " << r << "\n";
+                    toVisit.emplace(r);
+                }
+                visitAll();
+
+                dirtied = {};
+                dql.lock();
                 std::swap(dirtied, _gc_dirty_notif_queue);
-
-                start = std::chrono::high_resolution_clock::now();
-                while (!dirtied.empty()) {
-                    dql.unlock();
-                    for (const auto &r: dirtied) {
-                        //                        std::cerr << "processing dirty " << r << "\n";
-                        if (seenroots.contains(r)) continue;
-                        seenroots.emplace(r);
-                        toVisit.emplace(r);
-                    }
-                    visitAll();
-
-                    dirtied = {};
-                    dql.lock();
-                    std::swap(dirtied, _gc_dirty_notif_queue);
-                }
-
-                stop = std::chrono::high_resolution_clock::now();
-                std::cerr << "Dirty mark time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
-
-                assert(dql.owns_lock());
-
-                uint64_t freed = 0;
-                start = std::chrono::high_resolution_clock::now();
-
-                std::vector<Cell *> toremove;
-                for (const auto &l: _cells) {
-                    if (!l->live) {
-                        freed += 1;
-
-                        if (l->_type == CellType::NUMATOM) {
-                            std::lock_guard il(_indexes_lock);
-                            //                            std::cerr << "deleting num: " << l << "\n";
-                            _numatom_index.erase(dynamic_cast<NumAtomCell &>(*l)._val);
-                        } else if (l->_type == CellType::STRATOM) {
-                            std::lock_guard il(_indexes_lock);
-                            //                            std::cerr << "deleting str: " << l << "\n";
-                            _stratom_index.erase(dynamic_cast<StrAtomCell &>(*l)._val);
-                        }
-
-                        assert(!_roots.contains(l));
-                        //                        std::cerr << "deleting: " << l << "\n";
-                        toremove.emplace_back(l);
-                        delete l;
-                    } else {
-                        //                        std::cerr << "resetting num: " << l << "\n";
-                        l->live = false;
-                    }
-                }
-
-                for (const auto &l: toremove) {
-                    _cells.erase(l);
-                }
-
-                stop = std::chrono::high_resolution_clock::now();
-                std::cerr << "Sweep time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
-                _cells_num = _cells.size();
-                std::cerr << "GC Freed " << freed << " cells left: " << _cells_num << " \n";
             }
 
-            {
-                std::unique_lock l(_gc_done_m);
-                std::unique_lock l2(_gc_request_m);
-                _gc_done = true;
-                _gc_request = false;
-                _gc_done_cv.notify_all();
-            }
+            auto stop = std::chrono::high_resolution_clock::now();
+            std::cerr << "Dirty mark time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+        }
+        {
+            auto start = std::chrono::high_resolution_clock::now();
+
+            uint64_t freed = 0;
+
+            _cells.remove_if([&](Cell *l) {
+                if (!l->live) {
+                    freed += 1;
+
+                    if (l->_type == CellType::NUMATOM) {
+                        std::lock_guard il(_indexes_lock);
+                        //                            std::cerr << "deleting num: " << l << "\n";
+                        _numatom_index.erase(dynamic_cast<NumAtomCell &>(*l)._val);
+                    } else if (l->_type == CellType::STRATOM) {
+                        std::lock_guard il(_indexes_lock);
+                        //                            std::cerr << "deleting str: " << l << "\n";
+                        _stratom_index.erase(dynamic_cast<StrAtomCell &>(*l)._val);
+                    }
+
+                    delete l;
+                    return true;
+                }
+                return false;
+            });
+
+            auto stop = std::chrono::high_resolution_clock::now();
+            std::cerr << "Sweep time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+            _cells_num = _cells.size();
+            std::cerr << "GC Freed " << freed << " cells left: " << _cells_num << " \n";
+        }
+
+        auto gcstop = std::chrono::high_resolution_clock::now();
+        std::cerr << "GC total time: " << std::chrono::duration_cast<std::chrono::microseconds>(gcstop - gcstart).count() << "\n";
+
+
+        {
+            std::unique_lock l(_gc_done_m);
+            std::unique_lock l2(_gc_request_m);
+            _gc_done = true;
+            _gc_request = false;
+            _gc_done_cv.notify_all();
         }
     }
 }
