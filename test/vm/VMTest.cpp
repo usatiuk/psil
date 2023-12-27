@@ -9,11 +9,11 @@ TEST(VMTest, BasicHello) {
         MemoryContext mc;
         VM vm(ssin, ssout);
         Handle newc(Handle::cons(nullptr, nullptr));
-        Handle::append(newc, Handle::makeStrCell("NIL"));
-        Handle::append(newc, Handle::makeStrCell("LDC"));
-        Handle::append(newc, Handle::makeNumCell('h'));
-        Handle::append(newc, Handle::makeStrCell("PUTCHAR"));
-        Handle::append(newc, Handle::makeStrCell("STOP"));
+        newc.append(Handle::makeStrCell("NIL"));
+        newc.append(Handle::makeStrCell("LDC"));
+        newc.append(Handle::makeNumCell('h'));
+        newc.append(Handle::makeStrCell("PUTCHAR"));
+        newc.append(Handle::makeStrCell("STOP"));
         vm.loadControl(newc);
         vm.run();
     }
@@ -21,6 +21,7 @@ TEST(VMTest, BasicHello) {
     EXPECT_EQ(ssout.str(), "h");
 }
 
+//TODO: maybe rewrite it all...
 //TEST(VMTest, SelTest) {
 //    std::stringstream ssin;
 //    std::stringstream ssout;

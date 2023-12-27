@@ -16,13 +16,13 @@ void VM::run() {
 }
 
 void VM::step() {
-    Handle poppedH = Handle::pop(_c);
+    Handle poppedH = _c.pop();
     if (poppedH == NIL) {
-        Handle::push(_s, nullptr);
+        _s.push(nullptr);
     } else if (poppedH == LDC) {
-        Handle::push(_s, Handle::pop(_c));
+        _s.push(_c.pop());
     } else if (poppedH == LD) {
-        Handle poppedH2 = Handle::pop(_c);
+        Handle poppedH2 = _c.pop();
 
         int64_t frame = poppedH2.car().val();
         int64_t arg = poppedH2.cdr().val();
@@ -42,92 +42,87 @@ void VM::step() {
             curArg = curArg.cdr();
         }
 
-        Handle::push(_s, curArg.car());
+        _s.push(curArg.car());
     } else if (poppedH == SEL) {
+        Handle popped2H = _s.pop();
 
-        Handle popped2H = Handle::pop(_s);
+        Handle ct = _c.pop();
+        Handle cf = _c.pop();
 
-        Handle ct = Handle::pop(_c);
-        Handle cf = Handle::pop(_c);
-
-        Handle::push(_d, _c);
+        _d.push(_c);
         if (popped2H.val() > 0) {
             _c = ct;
         } else {
             _c = cf;
         }
     } else if (poppedH == JOIN) {
-        _c = Handle::pop(_d);
+        _c = _d.pop();
     } else if (poppedH == LDF) {
-        Handle::push(_s, Handle::cons(Handle::pop(_c), _e));
+        _s.push(Handle::cons(_c.pop(), _e));
     } else if (poppedH == AP) {
-        Handle closureH = Handle::pop(_s);
-        Handle argsH = Handle::pop(_s);
+        Handle closureH = _s.pop();
+        Handle argsH = _s.pop();
 
-        Handle::push(_d, _s);
-        Handle::push(_d, _e);
-        Handle::push(_d, _c);
+        _d.push(_s);
+        _d.push(_e);
+        _d.push(_c);
 
         _s = Handle::cons(nullptr, nullptr);
         _c = closureH.car();
         _e = closureH.cdr();
-        Handle::push(_e, argsH);
+        _e.push(argsH);
     } else if (poppedH == RET) {
-        Handle c = Handle::pop(_d);
-        Handle e = Handle::pop(_d);
-        Handle s = Handle::pop(_d);
+        Handle c = _d.pop();
+        Handle e = _d.pop();
+        Handle s = _d.pop();
 
-        Handle ret = Handle::pop(_s);
+        Handle ret = _s.pop();
 
         _c = c;
         _e = e;
         _s = s;
 
-        Handle::push(_s, ret);
+        _s.push(ret);
     } else if (poppedH == DUM) {
-        Handle::push(_e, nullptr);
+        _e.push(nullptr);
     } else if (poppedH == RAP) {
-        Handle closureH = Handle::pop(_s);
-        Handle argsH = Handle::pop(_s);
-
+        Handle closureH = _s.pop();
+        Handle argsH = _s.pop();
 
         Handle origE = _e.cdr();
 
-        Handle::push(_d, _s);
-        Handle::push(_d, origE);
-        Handle::push(_d, _c);
+        _d.push(_s);
+        _d.push(origE);
+        _d.push(_c);
 
         _s = Handle::cons(nullptr, nullptr);
         _c = closureH.car();
         _e = closureH.cdr();
 
         Handle fnEnv = closureH.cdr();
-        //        assert(_e.get() == fnEnv.get());
+        assert(_e == fnEnv);
 
-        Handle::push(_e, argsH);
+        _e.push(argsH);
         fnEnv.setcar(argsH);
     } else if (poppedH == STOP) {
         _stop = true;
     } else if (poppedH == ADD) {
-        int64_t ret = Handle::pop(_s).val() + Handle::pop(_s).val();
-        Handle::push(_s, Handle::makeNumCell(ret));
+        _s.push(_s.pop().val() + _s.pop().val());
     } else if (poppedH == SUB) {
         assert(false);
-        int64_t ret = Handle::pop(_s).val() + Handle::pop(_s).val();
-        Handle::push(_s, Handle::makeNumCell(ret));
     } else if (poppedH == CONS) {
-        Handle h1 = Handle::pop(_s);
-        Handle h2 = Handle::pop(_s);
+        Handle h1 = _s.pop();
+        Handle h2 = _s.pop();
 
-        Handle::push(_s, Handle::cons(h1, h2));
+        _s.push(Handle::cons(h1, h2));
     } else if (poppedH == READCHAR) {
         char c;
         _instream >> c;
-        Handle::push(_s, Handle::makeNumCell(c));
+        _s.push(Handle::makeNumCell(c));
     } else if (poppedH == PUTCHAR) {
-        _outstream << (char) Handle::pop(_s).val();
+        _outstream << (char) _s.pop().val();
     } else if (poppedH == PUTNUM) {
-        _outstream << Handle::pop(_s).val();
+        _outstream << _s.pop().val();
     } else {
         assert(false);
     }

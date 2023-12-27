@@ -31,24 +31,25 @@ Handle Handle::cons(const Handle &car, const Handle &cdr) {
     return ret;
 }
 
-Handle Handle::pop(Handle &from) {
-    auto ret = from.car();
-    from = from.cdr();
+Handle Handle::pop() {
+    auto ret = car();
+    *this = cdr();
     return ret;
 }
 
-void Handle::push(Handle &to, const Handle &what) {
-    to = cons(what, to);
+void Handle::push(const Handle &what) {
+    *this = cons(what, *this);
 }
 
-void Handle::append(Handle to, const Handle &what) {
-    assert(to.get() != nullptr);
-    if (to.car().get() == nullptr) {
-        to.setcar(what);
+void Handle::append(const Handle &what) {
+    Handle cur = *this;
+    assert(cur.get() != nullptr);
+    if (cur.car().get() == nullptr) {
+        cur.setcar(what);
         return;
     }
-    while (to.cdr().get() != nullptr) to = to.cdr();
-    to.setcdr(cons(what, nullptr));
+    while (cur.cdr().get() != nullptr) cur = cur.cdr();
+    cur.setcdr(cons(what, nullptr));
 }
 
 Handle Handle::makeNumCell(int64_t val) {
@@ -71,4 +72,10 @@ void Handle::setcdr(const Handle &cdr) {
         dirty(dynamic_cast<ConsCell &>(*_target)._cdr);
         dynamic_cast<ConsCell &>(*_target)._cdr = cdr.get();
     });
+}
+Handle::Handle(int64_t val) {
+    *this = Handle::makeNumCell(val);
+}
+Handle::Handle(std::string strval) {
+    *this = Handle::makeStrCell(std::move(strval));
 }

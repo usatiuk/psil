@@ -32,7 +32,7 @@ Handle Parser::parseExpr() {
 
                     return out;
                 }
-                Handle::append(out, parseExpr());
+                out.append(parseExpr());
                 token = _tokenizer.peek();
             }
             _tokenizer.getNext();
