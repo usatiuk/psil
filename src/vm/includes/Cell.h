@@ -7,9 +7,10 @@
 
 #include <cassert>
 #include <cstdint>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <utility>
-
 enum class CellType {
     NUMATOM,
     STRATOM,
@@ -23,7 +24,9 @@ struct Cell {
     virtual ~Cell() = 0;
 
     CellType _type;
-    std::atomic<bool> live = false;
+    std::atomic<bool> _live = false;
+
+    virtual void print(std::ostream &out) = 0;
 };
 
 struct NumAtomCell : public Cell {
@@ -31,6 +34,10 @@ struct NumAtomCell : public Cell {
     explicit NumAtomCell(CellValType val) : Cell(CellType::NUMATOM), _val(val) {}
 
     CellValType _val;
+
+    void print(std::ostream &out) override {
+        out << _val;
+    }
 };
 
 struct StrAtomCell : public Cell {
@@ -38,6 +45,10 @@ struct StrAtomCell : public Cell {
     explicit StrAtomCell(std::string val) : Cell(CellType::STRATOM), _val(std::move(val)) {}
 
     std::string _val;
+
+    void print(std::ostream &out) override {
+        out << _val;
+    }
 };
 
 struct ConsCell : public Cell {
@@ -47,6 +58,29 @@ struct ConsCell : public Cell {
 
     std::atomic<Cell *> _car = nullptr;
     std::atomic<Cell *> _cdr = nullptr;
+
+    void print(std::ostream &out) override {
+        std::stringstream res;
+        if (_car) {
+            if (_car.load()->_type == CellType::CONS) {
+                res << "(";
+                _car.load()->print(res);
+                res << ")";
+            } else {
+                _car.load()->print(res);
+            }
+        }
+        if (_cdr) {
+            if (_cdr.load()->_type == CellType::CONS) {
+                res << " ";
+                _cdr.load()->print(res);
+            } else {
+                res << ".";
+                _cdr.load()->print(res);
+            }
+        }
+        out << res.str();
+    }
 };
 
 #endif//PSIL_CELL_H

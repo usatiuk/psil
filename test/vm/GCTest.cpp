@@ -85,8 +85,9 @@ TEST(GCTest, GCTestAppend2) {
 
 TEST(GCTest, GCTestAppend3) {
     MemoryContext mc;
-    for (int i = 0; i < 25000; i++) {
+    for (int i = 0; i < 250000; i++) {
         Handle c = Handle::cons(nullptr, nullptr);
+        mc.request_gc();
         c.append(Handle::makeNumCell(1));
         c.append(Handle::makeNumCell(2));
         mc.request_gc();

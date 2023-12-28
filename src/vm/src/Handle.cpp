@@ -42,14 +42,31 @@ void Handle::push(const Handle &what) {
 }
 
 void Handle::append(const Handle &what) {
+    if (_target == nullptr) *this = cons(nullptr, nullptr);
     Handle cur = *this;
-    assert(cur.get() != nullptr);
     if (cur.car().get() == nullptr) {
         cur.setcar(what);
         return;
     }
     while (cur.cdr().get() != nullptr) cur = cur.cdr();
     cur.setcdr(cons(what, nullptr));
+}
+
+void Handle::splice(const Handle &what) {
+    if (_target == nullptr) {
+        *this = what;
+        return;
+    }
+    Handle cur = *this;
+    if (cur.car().get() == nullptr) {
+        *this = what;
+        return;
+    }
+    while (cur.cdr().get() != nullptr)
+        cur = cur.cdr();
+    if (what.atom()) cur.setcdr(Handle::cons(what, nullptr));
+    else
+        cur.setcdr(what);
 }
 
 Handle Handle::makeNumCell(int64_t val) {

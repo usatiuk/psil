@@ -45,12 +45,16 @@ private:
     Handle RAP = Handle::makeStrCell("RAP");
     Handle STOP = Handle::makeStrCell("STOP");
 
+    Handle ATOM = Handle::makeStrCell("ATOM");
     Handle ADD = Handle::makeStrCell("ADD");
     Handle SUB = Handle::makeStrCell("SUB");
 
     Handle READCHAR = Handle::makeStrCell("READCHAR");
     Handle PUTCHAR = Handle::makeStrCell("PUTCHAR");
     Handle PUTNUM = Handle::makeStrCell("PUTNUM");
+
+    Handle EVAL = Handle::makeStrCell("EVAL");
+    Handle PRINT = Handle::makeStrCell("PRINT");
 
     Handle CONS = Handle::makeStrCell("CONS");
 };

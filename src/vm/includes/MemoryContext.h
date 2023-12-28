@@ -32,50 +32,6 @@ public:
         return alloc_cell<CT>(std::forward<Args>(args)...);
     }
 
-    template<>
-    Handle create_cell<NumAtomCell>(CellValType val) {
-        std::optional<Handle> ret = run_dirty<std::optional<Handle>>([&](std::function<void(Cell *)> dirty) -> std::optional<Handle> {
-            std::lock_guard il(_indexes_lock);
-            if (_numatom_index.contains(val)) {
-                dirty(_numatom_index.at(val));
-                return _numatom_index.at(val);
-            } else {
-                return std::nullopt;
-            }
-        });
-
-        if (ret.has_value()) return *ret;
-
-        Handle newc = alloc_cell<NumAtomCell>(val);
-        {
-            std::lock_guard il(_indexes_lock);
-            _numatom_index.emplace(val, newc.get());
-        }
-        return newc;
-    }
-
-    template<>
-    Handle create_cell<StrAtomCell>(std::string val) {
-        std::optional<Handle> ret = run_dirty<std::optional<Handle>>([&](std::function<void(Cell *)> dirty) -> std::optional<Handle> {
-            std::lock_guard il(_indexes_lock);
-            if (_stratom_index.contains(val)) {
-                dirty(_stratom_index.at(val));
-                return _stratom_index.at(val);
-            } else {
-                return std::nullopt;
-            }
-        });
-
-        if (ret.has_value()) return *ret;
-
-        Handle newc = alloc_cell<StrAtomCell>(val);
-        {
-            std::lock_guard il(_indexes_lock);
-            _stratom_index.emplace(val, newc.get());
-        }
-        return newc;
-    }
-
 
     void request_gc_and_wait() {
         std::unique_lock l(_gc_done_m);
@@ -100,7 +56,14 @@ public:
     template<typename R>
     R run_dirty(const std::function<R(std::function<void(Cell *)>)> &f) {
         std::lock_guard l(_gc_dirty_notif_queue_lock);
-        return f([&](Cell *c) { _gc_dirty_notif_queue.emplace(c); });
+        return f([&](Cell *c) {
+//            {
+//                std::stringstream out;
+//                out << "marked dirty: " << c << " \n";
+//                std::cerr << out.str();
+//            }
+
+            _gc_dirty_notif_queue.emplace(c); });
     }
 
 private:
@@ -148,10 +111,6 @@ private:
     std::list<Cell *> _cells;
     std::atomic<size_t> _cells_num = 0;
     std::list<Cell *> _temp_cells;
-
-    std::mutex _indexes_lock;
-    std::unordered_map<CellValType, Cell *> _numatom_index;
-    std::unordered_map<std::string, Cell *> _stratom_index;
 
     static constexpr size_t _cell_limit = {50000};
 

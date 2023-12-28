@@ -6,6 +6,7 @@
 #include <set>
 #include <utility>
 
+#include "Compiler.h"
 #include "VM.h"
 
 
@@ -21,6 +22,8 @@ void VM::step() {
         _s.push(nullptr);
     } else if (poppedH == LDC) {
         _s.push(_c.pop());
+    } else if (poppedH == ATOM) {
+        _s.push(_c.pop().atom() ? 1 : 0);
     } else if (poppedH == LD) {
         Handle poppedH2 = _c.pop();
 
@@ -122,6 +125,17 @@ void VM::step() {
     } else if (poppedH == PUTCHAR) {
         _outstream << (char) _s.pop().val();
     } else if (poppedH == PUTNUM) {
+        _outstream << _s.pop().val();
+    } else if (poppedH == EVAL) {
+        Handle code = _s.pop();
+        Handle newc = Compiler::compile(code, nullptr);
+        std::cerr << "compiled:\n";
+        std::cerr << "(" << code << ")\n";
+        std::cerr << "to:\n";
+        std::cerr << "(" << newc << ")\n";
+        newc.splice(_c);
+        _c = newc;
+    } else if (poppedH == PRINT) {
         _outstream << _s.pop().val();
     } else {
         assert(false);

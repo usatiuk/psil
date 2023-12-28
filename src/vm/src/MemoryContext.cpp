@@ -7,6 +7,7 @@
 #include <chrono>
 #include <exception>
 #include <iostream>
+#include <sstream>
 #include <unordered_set>
 
 std::atomic<MemoryContext *> CURRENT_MC = nullptr;
@@ -34,14 +35,22 @@ void MemoryContext::add_root(Cell *c) {
     {
         std::lock_guard l(_new_roots_lock);
         _new_roots[c]++;
-        //        std::cerr << "new root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c] << "\n";
+        //        {
+        //            std::stringstream out;
+        //            out << "new root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c] << "\n";
+        //            std::cerr << out.str();
+        //        }
     }
 }
 void MemoryContext::remove_root(Cell *c) {
     {
         std::lock_guard l(_new_roots_lock);
         _new_roots[c]--;
-        //        std::cerr << "del root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c] << "\n";
+        //        {
+        //            std::stringstream out;
+        //            out << "del root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c] << "\n";
+        //            std::cerr << out.str();
+        //        }
         if (_new_roots[c] == 0) _new_roots.erase(c);
     }
 }
@@ -54,7 +63,11 @@ void MemoryContext::gc_thread_entry() {
         }
         if (_gc_thread_stop) return;
 
-        std::cerr << "gc start " << '\n';
+        //        {
+        //            std::stringstream out;
+        //            out << "gc start " << '\n';
+        //            std::cerr << out.str();
+        //        }
         auto gcstart = std::chrono::high_resolution_clock::now();
 
         std::queue<Cell *> toVisit;
@@ -65,19 +78,23 @@ void MemoryContext::gc_thread_entry() {
                 toVisit.pop();
 
                 if (c == nullptr) continue;
-                if (c->live) continue;
-                c->live = true;
-
-                //                std::cerr << "processing c " << c << " " << static_cast<int>(c->_type) << "\n";
+                if (c->_live) continue;
+                c->_live = true;
+                //
+                //                {
+                //                    std::stringstream out;
+                //                    out << "processing c " << c << " " << static_cast<int>(c->_type) << "\n";
+                //                    std::cerr << out.str();
+                //                }
 
                 if (c->_type == CellType::CONS) {
                     ConsCell &cc = dynamic_cast<ConsCell &>(*c);
-                    //                    std::cerr << "processing car " << cc._car << "\n";
+                    //                                        {std::stringstream out; out  << "processing car " << cc._car << "\n"; std::cerr<<out.str();}
                     toVisit.emplace(cc._car);
-                    //                    std::cerr << "real car " << toVisit.back() << "\n";
-                    //                    std::cerr << "processing cdr " << cc._cdr << "\n";
+                    //                    {std::stringstream out; out  << "real car " << toVisit.back() << "\n"; std::cerr<<out.str();}
+                    //                    {std::stringstream out; out  << "processing cdr " << cc._cdr << "\n"; std::cerr<<out.str();}
                     toVisit.emplace(cc._cdr);
-                    //                    std::cerr << "real cdr " << toVisit.back() << "\n";
+                    //                    {std::stringstream out; out  << "real cdr " << toVisit.back() << "\n"; std::cerr<<out.str();}
                 }
             }
         };
@@ -97,7 +114,11 @@ void MemoryContext::gc_thread_entry() {
 
 
             for (auto const &r: new_roots) {
-                //                    std::cerr << "processing new " << r.first << " diff " << r.second << "\n";
+                //                {
+                //                    std::stringstream out;
+                //                    out << "processing new " << r.first << " diff " << r.second << "\n";
+                //                    std::cerr << out.str();
+                //                }
                 if (r.second == 0) continue;
                 _roots[r.first] += r.second;
                 if (_roots[r.first] <= 0)
@@ -105,46 +126,72 @@ void MemoryContext::gc_thread_entry() {
             }
 
             auto stop = std::chrono::high_resolution_clock::now();
-            std::cerr << "New roots time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+            {
+                std::stringstream out;
+                out << "New roots time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+                std::cout << out.str();
+            }
         }
 
         {
             auto start = std::chrono::high_resolution_clock::now();
             std::for_each(_cells.begin(), _cells.end(), [&](Cell *c) {
-                c->live = false;
+                c->_live = false;
             });
 
             for (const auto &r: _roots) {
-                //                std::cerr << "processing r " << r.first << " diff " << r.second << "\n";
+                //                {
+                //                    std::stringstream out;
+                //                    out << "processing r " << r.first << " diff " << r.second << "\n";
+                //                    std::cerr << out.str();
+                //                }
                 toVisit.emplace(r.first);
             }
             visitAll();
             auto stop = std::chrono::high_resolution_clock::now();
-            //            std::cerr << "Scanned " << _roots.size() << " roots" << std::endl;
-            std::cerr << "Roots scan time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+            //            {
+            //                std::stringstream out;
+            //                out << "Scanned " << _roots.size() << " roots" << std::endl;
+            //                std::cerr << out.str();
+            //            }
+            {
+                std::stringstream out;
+                out << "Roots scan time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+                std::cout << out.str();
+            }
         }
 
         {
             auto start = std::chrono::high_resolution_clock::now();
             decltype(_gc_dirty_notif_queue) dirtied;
-            std::unique_lock dql(_gc_dirty_notif_queue_lock);
-            std::swap(dirtied, _gc_dirty_notif_queue);
-
+            {
+                std::lock_guard dql(_gc_dirty_notif_queue_lock);
+                std::swap(dirtied, _gc_dirty_notif_queue);
+            }
             while (!dirtied.empty()) {
-                dql.unlock();
                 for (const auto &r: dirtied) {
-                    //                        std::cerr << "processing dirty " << r << "\n";
+                    //                    {
+                    //                        std::stringstream out;
+                    //                        out << "processing dirty " << r << "\n";
+                    //                        std::cerr << out.str();
+                    //                    }
                     toVisit.emplace(r);
                 }
                 visitAll();
 
                 dirtied = {};
-                dql.lock();
-                std::swap(dirtied, _gc_dirty_notif_queue);
+                {
+                    std::lock_guard dql(_gc_dirty_notif_queue_lock);
+                    std::swap(dirtied, _gc_dirty_notif_queue);
+                }
             }
 
             auto stop = std::chrono::high_resolution_clock::now();
-            std::cerr << "Dirty mark time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+            {
+                std::stringstream out;
+                out << "Dirty mark time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+                std::cout << out.str();
+            }
         }
         {
             auto start = std::chrono::high_resolution_clock::now();
@@ -152,18 +199,14 @@ void MemoryContext::gc_thread_entry() {
             uint64_t freed = 0;
 
             _cells.remove_if([&](Cell *l) {
-                if (!l->live) {
+                if (!l->_live) {
                     freed += 1;
 
-                    if (l->_type == CellType::NUMATOM) {
-                        std::lock_guard il(_indexes_lock);
-                        //                            std::cerr << "deleting num: " << l << "\n";
-                        _numatom_index.erase(dynamic_cast<NumAtomCell &>(*l)._val);
-                    } else if (l->_type == CellType::STRATOM) {
-                        std::lock_guard il(_indexes_lock);
-                        //                            std::cerr << "deleting str: " << l << "\n";
-                        _stratom_index.erase(dynamic_cast<StrAtomCell &>(*l)._val);
-                    }
+                    //                    {
+                    //                        std::stringstream out;
+                    //                        out << "deleting: " << l << "\n";
+                    //                        std::cerr << out.str();
+                    //                    }
 
                     delete l;
                     return true;
@@ -172,13 +215,25 @@ void MemoryContext::gc_thread_entry() {
             });
 
             auto stop = std::chrono::high_resolution_clock::now();
-            std::cerr << "Sweep time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+            {
+                std::stringstream out;
+                out << "Sweep time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
+                std::cout << out.str();
+            }
             _cells_num = _cells.size();
-            std::cerr << "GC Freed " << freed << " cells left: " << _cells_num << " \n";
+            {
+                std::stringstream out;
+                out << "GC Freed " << freed << " cells left: " << _cells_num << " \n";
+                std::cout << out.str();
+            }
         }
 
         auto gcstop = std::chrono::high_resolution_clock::now();
-        std::cerr << "GC total time: " << std::chrono::duration_cast<std::chrono::microseconds>(gcstop - gcstart).count() << "\n";
+        {
+            std::stringstream out;
+            out << "GC total time: " << std::chrono::duration_cast<std::chrono::microseconds>(gcstop - gcstart).count() << "\n";
+            std::cout << out.str();
+        }
 
 
         {
