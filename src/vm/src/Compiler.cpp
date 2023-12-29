@@ -34,10 +34,10 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
     if (expr.null()) {
         out.append(Handle("NIL"));
     } else if (expr.atom()) {
-        if (expr.type() == CellType::NUMATOM) {
+        if (expr.num()) {
             out.append(Handle("LDC"));
             out.append(expr);
-        } else if (expr.type() == CellType::STRATOM) {
+        } else if (expr.str()) {
             Handle idx = findIndex(expr, fake_env);
             if (idx == nullptr) {
                 out.append(Handle("LDC"));

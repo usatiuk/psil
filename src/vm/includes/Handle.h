@@ -24,15 +24,11 @@ public:
     bool operator==(const Handle &rhs) const {
         if (_target == rhs._target) {
             return true;
-        } else if ((_target != nullptr && rhs._target != nullptr) && (_target->_type == rhs._target->_type)) {
-            if (_target->_type == CellType::NUMATOM) {
+        } else if ((_target != nullptr && rhs._target != nullptr) && (typeid(_target) == typeid(rhs._target))) {
+            if (auto p = dynamic_cast<NumAtomCell *>(_target)) {
                 return dynamic_cast<NumAtomCell &>(*_target)._val == dynamic_cast<NumAtomCell &>(*rhs._target)._val;
-            } else if (_target->_type == CellType::STRATOM) {
+            } else if (auto p = dynamic_cast<StrAtomCell *>(_target)) {
                 return dynamic_cast<StrAtomCell &>(*_target)._val == dynamic_cast<StrAtomCell &>(*rhs._target)._val;
-            } else if (_target->_type == CellType::CONS) {
-                // This is questionable
-                return dynamic_cast<ConsCell &>(*_target)._car == dynamic_cast<ConsCell &>(*rhs._target)._car &&
-                       dynamic_cast<ConsCell &>(*_target)._cdr == dynamic_cast<ConsCell &>(*rhs._target)._cdr;
             }
         }
         return false;
@@ -45,18 +41,23 @@ public:
     CellValType val() { return dynamic_cast<NumAtomCell &>(*_target)._val; }
     std::string_view strval() { return dynamic_cast<StrAtomCell &>(*_target)._val; }
 
-    CellType type() const {
-        if (!_target) return CellType::CONS;
-        return _target->_type;
+    bool num() const {
+        return dynamic_cast<NumAtomCell *>(_target) != nullptr;
+    }
+    bool str() const {
+        return dynamic_cast<StrAtomCell *>(_target) != nullptr;
     }
 
     bool atom() const {
-        return type() != CellType::CONS;
+        if (!_target) return false;
+        return dynamic_cast<ConsCell *>(_target) == nullptr;
     }
 
     bool null() {
         if (!_target) return true;
-        if (type() == CellType::CONS && car() == nullptr && cdr() == nullptr) return true;
+        if (auto p = dynamic_cast<ConsCell *>(_target)) {
+            return car() == nullptr && cdr() == nullptr;
+        }
         return false;
     }
 

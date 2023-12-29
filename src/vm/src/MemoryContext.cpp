@@ -87,13 +87,12 @@ void MemoryContext::gc_thread_entry() {
                 //                    std::cerr << out.str();
                 //                }
 
-                if (c->_type == CellType::CONS) {
-                    ConsCell &cc = dynamic_cast<ConsCell &>(*c);
+                if (auto cc = dynamic_cast<ConsCell *>(c)) {
                     //                                        {std::stringstream out; out  << "processing car " << cc._car << "\n"; std::cerr<<out.str();}
-                    toVisit.emplace(cc._car);
+                    toVisit.emplace(cc->_car);
                     //                    {std::stringstream out; out  << "real car " << toVisit.back() << "\n"; std::cerr<<out.str();}
                     //                    {std::stringstream out; out  << "processing cdr " << cc._cdr << "\n"; std::cerr<<out.str();}
-                    toVisit.emplace(cc._cdr);
+                    toVisit.emplace(cc->_cdr);
                     //                    {std::stringstream out; out  << "real cdr " << toVisit.back() << "\n"; std::cerr<<out.str();}
                 }
             }
