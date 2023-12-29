@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "Compiler.h"
+#include "Parser.h"
 #include "VM.h"
 
 
@@ -136,7 +137,13 @@ void VM::step() {
         newc.splice(_c);
         _c = newc;
     } else if (poppedH == PRINT) {
-        _outstream << _s.pop().val();
+        _outstream << _s.pop();
+    } else if (poppedH == READ) {
+        std::string read;
+        std::getline(_instream, read);
+        Parser parser;
+        parser.loadStr(read);
+        _s.push(parser.parseExpr());
     } else {
         assert(false);
     }

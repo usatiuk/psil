@@ -54,6 +54,8 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
             if (car.strval() == "+") {
                 out.splice(compileArgsRaw(cdr));
                 out.append(Handle("ADD"));
+            } else if (car.strval() == "read") {
+                out.append(Handle("READ"));
             } else if (car.strval() == "lambda") {
                 out.append(Handle("LDF"));
                 out.append(compile(cdr.cdr().car(), Handle::cons(cdr.car(), fake_env), Handle("RET")));

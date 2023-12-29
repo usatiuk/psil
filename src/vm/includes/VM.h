@@ -55,6 +55,7 @@ private:
 
     Handle EVAL = Handle::makeStrCell("EVAL");
     Handle PRINT = Handle::makeStrCell("PRINT");
+    Handle READ = Handle::makeStrCell("READ");
 
     Handle CONS = Handle::makeStrCell("CONS");
 };

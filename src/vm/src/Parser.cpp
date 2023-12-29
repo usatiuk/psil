@@ -69,6 +69,7 @@ void Parser::Tokenizer::load(std::string_view input) {
     while (curpos != std::string_view::npos) {
         if (alnum.find(input.at(curpos)) != std::string::npos) {
             std::string_view::size_type end = input.find_first_not_of(alnum, curpos);
+            if (end == std::string_view ::npos) end = input.size();
             _tokens.emplace(input.cbegin() + curpos, input.cbegin() + end);
             curpos = end;
         } else if (special.find(input.at(curpos)) != std::string::npos) {
