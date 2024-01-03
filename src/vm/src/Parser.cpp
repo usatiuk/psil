@@ -36,7 +36,8 @@ Handle Parser::parseExpr() {
             return out;
         } else {
             token = _tokenizer.getNext();
-            if (token.find_first_not_of("-0123456789") == std::string::npos) {
+            if (token.find_first_not_of("0123456789") == std::string::npos ||
+                (token.length() > 1 && token.at(0) == '0' && token.find_first_not_of("0123456789", 1) == std::string::npos)) {
                 CellValType val = std::stoi(token);
                 return Handle::makeNumCell(val);
             } else {
@@ -45,7 +46,7 @@ Handle Parser::parseExpr() {
         }
     }
 
-    assert(false);
+    return Handle::cons(nullptr, nullptr);
 }
 std::string Parser::Tokenizer::getNext() {
     std::string ret = std::move(_tokens.front());
@@ -58,7 +59,7 @@ std::string_view Parser::Tokenizer::peek() const { return _tokens.front(); }
 void Parser::Tokenizer::load(std::string_view input) {
     std::string_view::size_type curpos = input.find_first_not_of(' ');
 
-    static const std::string alnum = "-+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static const std::string alnum = "-+><?=!0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     static const std::string special = "().";
 
     while (curpos != std::string_view::npos) {

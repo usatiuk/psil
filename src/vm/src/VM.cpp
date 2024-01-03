@@ -113,7 +113,23 @@ void VM::step() {
     } else if (poppedCmd == ADD) {
         _s.push(_s.pop().val() + _s.pop().val());
     } else if (poppedCmd == SUB) {
-        assert(false);
+        CellValType a1 = _s.pop().val();
+        CellValType a2 = _s.pop().val();
+        _s.push(a2 - a1);
+    } else if (poppedCmd == EQ) {
+        _s.push(_s.pop() == _s.pop() ? 1 : 0);
+    } else if (poppedCmd == LT) {
+        CellValType a1 = _s.pop().val();
+        CellValType a2 = _s.pop().val();
+        _s.push(a2 < a1 ? 1 : 0);
+    } else if (poppedCmd == GT) {
+        CellValType a1 = _s.pop().val();
+        CellValType a2 = _s.pop().val();
+        _s.push(a2 > a1 ? 1 : 0);
+    } else if (poppedCmd == CAR) {
+        _s.push(_s.pop().car());
+    } else if (poppedCmd == CDR) {
+        _s.push(_s.pop().cdr());
     } else if (poppedCmd == CONS) {
         Handle h1 = _s.pop();
         Handle h2 = _s.pop();
