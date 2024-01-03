@@ -6,10 +6,12 @@
 #include <set>
 #include <utility>
 
+#include "Command.h"
 #include "Compiler.h"
 #include "Parser.h"
 #include "VM.h"
 
+using namespace Command;
 
 VM::VM(std::istream &instream, std::ostream &outstream) : _instream(instream), _outstream(outstream) {}
 
@@ -19,13 +21,15 @@ void VM::run() {
 
 void VM::step() {
     Handle poppedH = _c.pop();
-    if (poppedH == NIL) {
+    // as to not complicate parser for tests...
+    CellValType poppedCmd = poppedH.type() == CellType::STRATOM ? str_to_cmd.at(poppedH.strval()) : poppedH.val();
+    if (poppedCmd == NIL) {
         _s.push(nullptr);
-    } else if (poppedH == LDC) {
+    } else if (poppedCmd == LDC) {
         _s.push(_c.pop());
-    } else if (poppedH == ATOM) {
+    } else if (poppedCmd == ATOM) {
         _s.push(_c.pop().atom() ? 1 : 0);
-    } else if (poppedH == LD) {
+    } else if (poppedCmd == LD) {
         Handle poppedH2 = _c.pop();
 
         int64_t frame = poppedH2.car().val();
@@ -43,7 +47,7 @@ void VM::step() {
         for (int i = 1; i < arg; i++) { curArg = curArg.cdr(); }
 
         _s.push(curArg.car());
-    } else if (poppedH == SEL) {
+    } else if (poppedCmd == SEL) {
         Handle popped2H = _s.pop();
 
         Handle ct = _c.pop();
@@ -55,11 +59,11 @@ void VM::step() {
         } else {
             _c = cf;
         }
-    } else if (poppedH == JOIN) {
+    } else if (poppedCmd == JOIN) {
         _c = _d.pop();
-    } else if (poppedH == LDF) {
+    } else if (poppedCmd == LDF) {
         _s.push(Handle::cons(_c.pop(), _e));
-    } else if (poppedH == AP) {
+    } else if (poppedCmd == AP) {
         Handle closureH = _s.pop();
         Handle argsH = _s.pop();
 
@@ -71,7 +75,7 @@ void VM::step() {
         _c = closureH.car();
         _e = closureH.cdr();
         _e.push(argsH);
-    } else if (poppedH == RET) {
+    } else if (poppedCmd == RET) {
         Handle c = _d.pop();
         Handle e = _d.pop();
         Handle s = _d.pop();
@@ -83,9 +87,9 @@ void VM::step() {
         _s = s;
 
         _s.push(ret);
-    } else if (poppedH == DUM) {
+    } else if (poppedCmd == DUM) {
         _e.push(nullptr);
-    } else if (poppedH == RAP) {
+    } else if (poppedCmd == RAP) {
         Handle closureH = _s.pop();
         Handle argsH = _s.pop();
 
@@ -104,26 +108,26 @@ void VM::step() {
 
         _e.push(argsH);
         fnEnv.setcar(argsH);
-    } else if (poppedH == STOP) {
+    } else if (poppedCmd == STOP) {
         _stop = true;
-    } else if (poppedH == ADD) {
+    } else if (poppedCmd == ADD) {
         _s.push(_s.pop().val() + _s.pop().val());
-    } else if (poppedH == SUB) {
+    } else if (poppedCmd == SUB) {
         assert(false);
-    } else if (poppedH == CONS) {
+    } else if (poppedCmd == CONS) {
         Handle h1 = _s.pop();
         Handle h2 = _s.pop();
 
         _s.push(Handle::cons(h1, h2));
-    } else if (poppedH == READCHAR) {
+    } else if (poppedCmd == READCHAR) {
         char c;
         _instream >> c;
         _s.push(Handle::makeNumCell(c));
-    } else if (poppedH == PUTCHAR) {
+    } else if (poppedCmd == PUTCHAR) {
         _outstream << (char) _s.pop().val();
-    } else if (poppedH == PUTNUM) {
+    } else if (poppedCmd == PUTNUM) {
         _outstream << _s.pop().val();
-    } else if (poppedH == EVAL) {
+    } else if (poppedCmd == EVAL) {
         Handle code = _s.pop();
         Handle newc = Compiler::compile(code, nullptr);
         Logger::log(
@@ -136,9 +140,9 @@ void VM::step() {
                 Logger::DEBUG);
         newc.splice(_c);
         _c = newc;
-    } else if (poppedH == PRINT) {
+    } else if (poppedCmd == PRINT) {
         _outstream << _s.pop();
-    } else if (poppedH == READ) {
+    } else if (poppedCmd == READ) {
         std::string read;
         std::getline(_instream, read);
         Parser parser;

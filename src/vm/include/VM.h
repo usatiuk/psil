@@ -19,7 +19,10 @@ public:
 
     void run();
 
-    void loadControl(const Handle &h) { _c = h; }
+    void loadControl(const Handle &h) {
+        _c = h;
+        _stop = false;
+    }
 
     void step();
 
@@ -32,32 +35,6 @@ private:
 
     std::istream &_instream;
     std::ostream &_outstream;
-
-    Handle NIL = Handle::makeStrCell("NIL");
-    Handle LDC = Handle::makeStrCell("LDC");
-    Handle LD = Handle::makeStrCell("LD");
-    Handle SEL = Handle::makeStrCell("SEL");
-    Handle JOIN = Handle::makeStrCell("JOIN");
-    Handle LDF = Handle::makeStrCell("LDF");
-    Handle AP = Handle::makeStrCell("AP");
-    Handle RET = Handle::makeStrCell("RET");
-    Handle DUM = Handle::makeStrCell("DUM");
-    Handle RAP = Handle::makeStrCell("RAP");
-    Handle STOP = Handle::makeStrCell("STOP");
-
-    Handle ATOM = Handle::makeStrCell("ATOM");
-    Handle ADD = Handle::makeStrCell("ADD");
-    Handle SUB = Handle::makeStrCell("SUB");
-
-    Handle READCHAR = Handle::makeStrCell("READCHAR");
-    Handle PUTCHAR = Handle::makeStrCell("PUTCHAR");
-    Handle PUTNUM = Handle::makeStrCell("PUTNUM");
-
-    Handle EVAL = Handle::makeStrCell("EVAL");
-    Handle PRINT = Handle::makeStrCell("PRINT");
-    Handle READ = Handle::makeStrCell("READ");
-
-    Handle CONS = Handle::makeStrCell("CONS");
 };
 
 #endif//PSIL_VM_H

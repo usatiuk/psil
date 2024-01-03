@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
+#include "Command.h"
 #include "VM.h"
 
+using namespace Command;
 TEST(VMTest, BasicHello) {
     std::stringstream ssin;
     std::stringstream ssout;
@@ -9,11 +11,11 @@ TEST(VMTest, BasicHello) {
 
         VM vm(ssin, ssout);
         Handle newc(Handle::cons(nullptr, nullptr));
-        newc.append(Handle::makeStrCell("NIL"));
-        newc.append(Handle::makeStrCell("LDC"));
+        newc.append(Handle::makeNumCell(NIL));
+        newc.append(Handle::makeNumCell(LDC));
         newc.append(Handle::makeNumCell('h'));
-        newc.append(Handle::makeStrCell("PUTCHAR"));
-        newc.append(Handle::makeStrCell("STOP"));
+        newc.append(Handle::makeNumCell(PUTCHAR));
+        newc.append(Handle::makeNumCell(STOP));
         vm.loadControl(newc);
         vm.run();
     }
