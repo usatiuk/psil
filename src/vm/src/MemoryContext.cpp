@@ -121,7 +121,7 @@ void MemoryContext::gc_thread_entry() {
             for (const auto &r: _roots) {
                 Logger::log(
                         "MemoryContext", [&](std::ostream &out) { out << "processing r " << r.first << " diff " << r.second; },
-                        Logger::DEBUG);
+                        Logger::TRACE);
                 toVisit.emplace(r.first);
             }
             visitAll();
@@ -166,7 +166,7 @@ void MemoryContext::gc_thread_entry() {
             _cells.remove_if([&](Cell *l) {
                 if (!l->_live) {
                     freed += 1;
-                    Logger::log("MemoryContext", [&](std::ostream &out) { out << "deleting: " << l; }, Logger::DEBUG);
+                    Logger::log("MemoryContext", [&](std::ostream &out) { out << "deleting: " << l; }, Logger::TRACE);
                     delete l;
                     return true;
                 }
