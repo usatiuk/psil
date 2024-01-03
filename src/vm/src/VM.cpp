@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <optional>
 #include <set>
 #include <utility>
 
@@ -86,6 +87,15 @@ void VM::step() {
         _d.push(_e);
         _d.push(_c);
 
+        std::optional<std::string> name;
+        if (Logger::en_level("VM", Logger::DEBUG)) {
+            name = "unknown";
+            for (const auto &p: _globals_names_map) {
+                if (p.first == closureH) name = p.second;
+            }
+            _d.push(Handle(*name));
+        }
+
         _s = Handle::cons(nullptr, nullptr);
         _c = closureH.car();
         _e = closureH.cdr();
@@ -93,17 +103,21 @@ void VM::step() {
         Logger::log(
                 "VM",
                 [&](std::ostream &out) {
-                    out << "Applying ";
-                    for (const auto &p: _globals_names_map) {
-                        if (p.first == closureH) out << p.second;
-                    }
+                    out << _cur_call_level;
+                    for (int i = 0; i < _cur_call_level; i++) out << "  ";
+                    out << " Applying " << *name;
                     out << " with args " << argsH;
                 },
                 Logger::DEBUG);
 
-
+        _cur_call_level++;
         _e.push(argsH);
     } else if (poppedCmd == RET) {
+        _cur_call_level--;
+
+        Handle n;
+        if (Logger::en_level("VM", Logger::DEBUG)) n = _d.pop();
+
         Handle c = _d.pop();
         Handle e = _d.pop();
         Handle s = _d.pop();
@@ -113,6 +127,19 @@ void VM::step() {
         _c = c;
         _e = e;
         _s = s;
+
+        Logger::log(
+                "VM",
+                [&](std::ostream &out) {
+                    out << _cur_call_level;
+                    for (int i = 0; i < _cur_call_level; i++) out << "  ";
+                    out << " Returning from " << n << " ";
+                    bool cons = !ret.atom();
+                    if (cons) out << "(";
+                    out << ret;
+                    if (cons) out << ")";
+                },
+                Logger::DEBUG);
 
         _s.push(ret);
     } else if (poppedCmd == DUM) {
@@ -127,12 +154,16 @@ void VM::step() {
         _d.push(origE);
         _d.push(_c);
 
+        if (Logger::en_level("VM", Logger::DEBUG)) _d.push(Handle("rap"));
+
         _s = Handle::cons(nullptr, nullptr);
         _c = closureH.car();
         _e = closureH.cdr();
 
         Handle fnEnv = closureH.cdr();
         assert(_e == fnEnv);
+
+        _cur_call_level++;
 
         _e.push(argsH);
         fnEnv.setcar(argsH);

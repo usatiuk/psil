@@ -33,6 +33,7 @@ private:
     Handle _globals_vals = Handle::cons(nullptr, nullptr);
     std::vector<std::pair<Handle, std::string>> _globals_names_map;
     size_t _cur_global = 0;
+    size_t _cur_call_level = 0;
     Handle _s = Handle::cons(nullptr, nullptr);
     Handle _e = Handle::cons(_globals_vals, nullptr);
     Handle _c = Handle::cons(nullptr, nullptr);

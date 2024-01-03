@@ -26,6 +26,8 @@ public:
     // 3 - debug
     // 4 - trace
     static void set_level(const std::string &tag, int level);
+    static int get_level(const std::string &tag);
+    static bool en_level(const std::string &tag, int level);
 
     static void set_out(std::ostream &out);
     static void set_out_err(std::ostream &out_err);
