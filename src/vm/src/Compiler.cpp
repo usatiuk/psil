@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <stack>
+#include <stdexcept>
 #include <string>
 
 #include "Command.h"
@@ -131,6 +132,7 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
 
                 out.append(make_cmd(LD));
                 Handle idx = findIndex(car, fake_env);
+                if (idx.null()) throw std::invalid_argument("Could not find function to apply: " + std::string(car.strval()));
                 out.append(idx);
                 out.append(make_cmd(AP));
             }
