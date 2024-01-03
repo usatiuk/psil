@@ -46,10 +46,6 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
             rev.push(args.car());
             args = args.cdr();
         }
-        while (!args.null()) {
-            rev.push(args.car());
-            args = args.cdr();
-        }
         while (!rev.empty()) {
             out.splice(compile(rev.top(), env));
             out.append(make_cmd(CONS));
