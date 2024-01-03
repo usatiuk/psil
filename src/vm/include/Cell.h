@@ -89,7 +89,7 @@ struct ConsCell : public Cell {
 
     void print(std::ostream &out) override {
         std::stringstream res;
-        std::set<Cell *> seen;
+        std::set<Cell *> seen{this};
         if (_car) {
             if (_car.load()->_type == CellType::CONS) {
                 res << "(";

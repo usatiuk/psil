@@ -23,7 +23,7 @@ Handle Parser::parseExpr() {
                 if (token == ".") {
                     _tokenizer.getNext();
 
-                    out.setcdr(parseExpr());
+                    if (_tokenizer.peek() != ")") out.setcdr(parseExpr());
 
                     if (_tokenizer.getNext() != ")") throw std::invalid_argument("Missing ) after pair");
 

@@ -41,7 +41,9 @@ void VM::step() {
     } else if (poppedCmd == LDC) {
         _s.push(_c.pop());
     } else if (poppedCmd == ATOM) {
-        _s.push(_c.pop().atom() ? 1 : 0);
+        _s.push(_s.pop().atom() ? 1 : 0);
+    } else if (poppedCmd == NILC) {
+        _s.push(_s.pop().null() ? 1 : 0);
     } else if (poppedCmd == LD) {
         Handle poppedH2 = _c.pop();
 
@@ -87,6 +89,19 @@ void VM::step() {
         _s = Handle::cons(nullptr, nullptr);
         _c = closureH.car();
         _e = closureH.cdr();
+
+        Logger::log(
+                "VM",
+                [&](std::ostream &out) {
+                    out << "Applying ";
+                    for (const auto &p: _globals_names_map) {
+                        if (p.first == closureH) out << p.second;
+                    }
+                    out << " with args " << argsH;
+                },
+                Logger::DEBUG);
+
+
         _e.push(argsH);
     } else if (poppedCmd == RET) {
         Handle c = _d.pop();
@@ -170,7 +185,14 @@ void VM::step() {
         newc.splice(_c);
         _c = newc;
     } else if (poppedCmd == LDG) {
-        _globals_vals.append(Handle::cons(_c.pop(), _e));
+        Handle newclosure = Handle::cons(_c.pop(), _e);
+
+        Handle curName = _globals_names.car();
+        for (int i = 0; i < _cur_global; i++) { curName = curName.cdr(); }
+        _globals_names_map.emplace_back(newclosure, curName.car().strval());
+        _cur_global++;
+
+        _globals_vals.append(newclosure);
     } else if (poppedCmd == PRINT) {
         if (!_s.null()) {
             Handle val = _s.pop();

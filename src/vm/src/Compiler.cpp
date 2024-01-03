@@ -16,8 +16,9 @@
 using namespace Command;
 
 
-static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD}, {"-", SUB}, {"cons", CONS}, {"car", CAR}, {"cdr", CDR},
-                                                               {"=", EQ},  {">", GT},  {"<", LT},      {"nil", NIL}};
+static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD},   {"-", SUB},     {"cons", CONS}, {"car", CAR},
+                                                               {"cdr", CDR}, {"=", EQ},      {">", GT},      {"<", LT},
+                                                               {"nil", NIL}, {"nil?", NILC}, {"atom", ATOM}};
 
 Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
@@ -80,7 +81,7 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
         if (car.atom()) {
             if (car.strval() == "quote") {
                 out.append(make_cmd(LDC));
-                out.splice(cdr);
+                out.splice(Handle::cons(cdr.car(), cdr.cdr()));
             } else if (builtins.find(car.strval()) != builtins.end()) {
                 out.splice(compileArgsRaw(cdr));
                 out.append(make_cmd(builtins.at(car.strval())));

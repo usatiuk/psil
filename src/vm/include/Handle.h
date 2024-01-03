@@ -37,8 +37,14 @@ public:
 
     static Handle cons(const Handle &car, const Handle &cdr);
 
-    Handle car() const { return dynamic_cast<ConsCell &>(*_target)._car.load(); }
-    Handle cdr() const { return dynamic_cast<ConsCell &>(*_target)._cdr.load(); }
+    Handle car() const {
+        if (!_target) return Handle(nullptr);
+        return dynamic_cast<ConsCell &>(*_target)._car.load();
+    }
+    Handle cdr() const {
+        if (!_target) return Handle(nullptr);
+        return dynamic_cast<ConsCell &>(*_target)._cdr.load();
+    }
     CellValType val() { return dynamic_cast<NumAtomCell &>(*_target)._val; }
     std::string_view strval() { return dynamic_cast<StrAtomCell &>(*_target)._val; }
 

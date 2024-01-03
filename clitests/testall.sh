@@ -3,8 +3,6 @@ cd "$(dirname "$0")"
 
 FAILED=()
 
-PSIL="../cmake-build-debug/src/psil"
-
 for FILE in *.psil; do
       echo "TESTING $FILE"
       $PSIL -f $FILE --repl- > $FILE.res

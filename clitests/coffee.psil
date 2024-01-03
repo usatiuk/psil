@@ -2,10 +2,19 @@
   (if (> a b) a b)
 )
 
+(define (equal a b)
+  (if (nil? a) (if (nil? b) 1 0)
+    (if (atom a)
+      (if (atom b) (= a b) 0)
+      (if (atom b) 0 (if (equal (car a) (car b)) (equal (cdr a) (cdr b)) 0))
+    )
+  )
+)
+
 (define (coffee-shop-impl times last cur max)
   (if (= times (nil))
       (getmax cur max)
-       (if (= last (car times))
+       (if (equal last (car times))
            (coffee-shop-impl (cdr times) last (+ cur 1) max)
            (coffee-shop-impl (cdr times) (car times) 1 (getmax cur max))
            )
@@ -15,6 +24,23 @@
 (define (coffee-shop times)
   (coffee-shop-impl times (nil) 0 0)
 )
+
+(equal (nil) (nil))
+(equal (nil) ())
+(equal () (nil))
+(equal (nil) (quote()))
+(equal () (nil))
+(equal () (quote()))
+
+(equal (quote(a))(quote()))
+(equal (quote(a)) ())
+(equal (quote(a)) (nil))
+
+(equal (quote(a)) (quote(a.)))
+(equal (quote(a.)) (quote(a b)))
+
+(equal (quote(a b)) (quote(a.b)))
+(equal (quote(a b)) (quote(a b)))
 
 (coffee-shop (nil))
 (coffee-shop (quote( (8 0) (8 10) (8 10) (8 45) )))
