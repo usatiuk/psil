@@ -14,6 +14,7 @@
 #include <queue>
 #include <set>
 #include <thread>
+#include <functional>
 
 #include "Cell.h"
 #include "Handle.h"

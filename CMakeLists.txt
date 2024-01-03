@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.20)
 project(psil)
 
 if (SANITIZE STREQUAL "YES")
@@ -18,7 +18,7 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_link_options(-O3)
 endif ()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(src)
 

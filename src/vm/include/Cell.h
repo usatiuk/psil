@@ -11,6 +11,8 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <atomic>
+
 enum class CellType {
     NUMATOM,
     STRATOM,

@@ -5,13 +5,14 @@
 #include "Compiler.h"
 
 #include <string>
+#include <functional>
 
 Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
     Handle out;
 
     std::function<Handle(Handle)> compileArgsRaw = [&](Handle args) {
         Handle out;
-        while (args != nullptr) {
+        while (!args.null()) {
             out.splice(compile(args.car(), fake_env));
             args = args.cdr();
         }
@@ -21,7 +22,7 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
     std::function<Handle(Handle, Handle)> compileArgsList = [&](Handle args, Handle env) {
         Handle out;
         out.append(Handle("NIL"));
-        while (args != nullptr) {
+        while (!args.null()) {
             out.splice(compile(args.car(), env));
             out.append(Handle("CONS"));
             args = args.cdr();
@@ -74,7 +75,7 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
 
                 Handle body = cdr.cdr().car();
 
-                while (definitions != nullptr) {
+                while (!definitions.null()) {
                     argBody.emplace_back(definitions.car().car(), definitions.car().cdr().car());
                     argNames.append(definitions.car().car());
                     argBodies.append(definitions.car().cdr().car());
@@ -116,11 +117,11 @@ Handle Compiler::findIndex(Handle symbol, Handle env) {
 
     Handle curFrame = env;
 
-    while (curFrame != nullptr) {
+    while (!curFrame.null()) {
         int64_t arg = 1;
         Handle curArg = curFrame.car();
 
-        while (curArg != nullptr) {
+        while (!curArg.null()) {
             if (curArg.car() == symbol) return Handle::cons(frame, arg);
             curArg = curArg.cdr();
             arg++;

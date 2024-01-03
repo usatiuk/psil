@@ -29,10 +29,6 @@ public:
                 return dynamic_cast<NumAtomCell &>(*_target)._val == dynamic_cast<NumAtomCell &>(*rhs._target)._val;
             } else if (_target->_type == CellType::STRATOM) {
                 return dynamic_cast<StrAtomCell &>(*_target)._val == dynamic_cast<StrAtomCell &>(*rhs._target)._val;
-            } else if (_target->_type == CellType::CONS) {
-                // This is questionable
-                return dynamic_cast<ConsCell &>(*_target)._car == dynamic_cast<ConsCell &>(*rhs._target)._car &&
-                       dynamic_cast<ConsCell &>(*_target)._cdr == dynamic_cast<ConsCell &>(*rhs._target)._cdr;
             }
         }
         return false;

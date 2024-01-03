@@ -4,7 +4,6 @@
 
 #include "Parser.h"
 
-#include <format>
 #include <ranges>
 #include <stack>
 

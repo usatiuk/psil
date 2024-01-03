@@ -7,6 +7,7 @@
 
 
 #include "Handle.h"
+
 class Compiler {
 public:
     static Handle compile(Handle src, Handle fake_env = nullptr, Handle suffix = nullptr);
