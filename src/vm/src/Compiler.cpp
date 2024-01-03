@@ -11,7 +11,7 @@
 
 using namespace Command;
 
-Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
+Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
 
     std::function<Handle(Handle)> compileArgsRaw = [&](Handle args) {
@@ -119,7 +119,7 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
     out.splice(suffix);
     return out;
 }
-Handle Compiler::findIndex(Handle symbol, Handle env) {
+Handle Compiler::findIndex(const Handle &symbol, const Handle &env) {
     int64_t frame = 1;
 
     Handle curFrame = env;

@@ -10,10 +10,10 @@
 
 class Compiler {
 public:
-    static Handle compile(Handle src, Handle fake_env = nullptr, Handle suffix = nullptr);
+    static Handle compile(const Handle &src, Handle fake_env = nullptr, const Handle &suffix = nullptr);
 
 private:
-    static Handle findIndex(Handle symbol, Handle env);
+    static Handle findIndex(const Handle &symbol, const Handle &env);
 };
 
 
