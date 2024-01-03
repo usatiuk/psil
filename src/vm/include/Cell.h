@@ -25,7 +25,7 @@ struct Cell {
     CellType _type;
     std::atomic<bool> _live = false;
 
-    virtual void print(std::ostream &out) = 0;
+    virtual void print(std::ostream &out) const = 0;
 };
 
 struct NumAtomCell : public Cell {
@@ -34,7 +34,7 @@ struct NumAtomCell : public Cell {
 
     CellValType _val;
 
-    void print(std::ostream &out) override { out << _val; }
+    void print(std::ostream &out) const override { out << _val; }
 };
 
 struct StrAtomCell : public Cell {
@@ -43,7 +43,7 @@ struct StrAtomCell : public Cell {
 
     std::string _val;
 
-    void print(std::ostream &out) override { out << _val; }
+    void print(std::ostream &out) const override { out << _val; }
 };
 
 struct ConsCell : public Cell {
@@ -54,7 +54,7 @@ struct ConsCell : public Cell {
     std::atomic<Cell *> _car = nullptr;
     std::atomic<Cell *> _cdr = nullptr;
 
-    void print_cons(std::ostream &out, std::set<Cell *> &seen) {
+    void print_cons(std::ostream &out, std::set<const Cell *> &seen) const {
         std::stringstream res;
         if (_car) {
             if (_car.load()->_type == CellType::CONS) {
@@ -89,9 +89,9 @@ struct ConsCell : public Cell {
         out << res.str();
     }
 
-    void print(std::ostream &out) override {
+    void print(std::ostream &out) const override {
         std::stringstream res;
-        std::set<Cell *> seen{this};
+        std::set<const Cell *> seen{this};
         if (_car) {
             if (_car.load()->_type == CellType::CONS) {
                 res << "(";

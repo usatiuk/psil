@@ -18,6 +18,8 @@ struct Cell;
 
 class Parser {
 public:
+    static Handle parse_str(std::string_view input);
+
     void loadStr(std::string_view input);
     Handle parseExpr();
 

@@ -10,6 +10,11 @@
 #include "MemoryContext.h"
 #include "VM.h"
 
+Handle Parser::parse_str(std::string_view input) {
+    Parser parser;
+    parser.loadStr(input);
+    return parser.parseExpr();
+}
 
 void Parser::loadStr(std::string_view input) { _tokenizer.load(input); }
 
@@ -52,6 +57,7 @@ Handle Parser::parseExpr() {
 
     return Handle::cons(nullptr, nullptr);
 }
+
 std::string Parser::Tokenizer::getNext() {
     std::string ret = std::move(_tokens.front());
     _tokens.pop();

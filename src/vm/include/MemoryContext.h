@@ -37,7 +37,6 @@ public:
         return alloc_cell<CT>(std::forward<Args>(args)...);
     }
 
-
     void request_gc_and_wait() {
         std::unique_lock l(_gc_done_m);
         _gc_done = false;
@@ -51,7 +50,7 @@ public:
         _gc_request_cv.notify_all();
     }
 
-    size_t cell_count() { return _cells_num; }
+    size_t cell_count() const { return _cells_num; }
 
     template<typename R>
     R run_dirty(const std::function<R(std::function<void(Cell *)>)> &f) {

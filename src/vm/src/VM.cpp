@@ -90,9 +90,7 @@ void VM::step() {
         std::optional<std::string> name;
         if (Logger::en_level("VM", Logger::DEBUG)) {
             name = "unknown";
-            for (const auto &p: _globals_names_map) {
-                if (p.first == closureH) name = p.second;
-            }
+            if (_globals_names_map.find(closureH) != _globals_names_map.end()) name = _globals_names_map.at(closureH);
             _d.push(Handle(*name));
         }
 
@@ -226,7 +224,7 @@ void VM::step() {
 
         Handle curName = _globals_names.car();
         for (int i = 0; i < _cur_global; i++) { curName = curName.cdr(); }
-        _globals_names_map.emplace_back(newclosure, curName.car().strval());
+        _globals_names_map.emplace(newclosure, curName.car().strval());
         _cur_global++;
 
         _globals_vals.append(newclosure);
@@ -242,9 +240,7 @@ void VM::step() {
     } else if (poppedCmd == READ) {
         std::string read;
         std::getline(_instream, read);
-        Parser parser;
-        parser.loadStr(read);
-        _s.push(parser.parseExpr());
+        _s.push(Parser::parse_str(read));
     } else {
         assert(false);
     }

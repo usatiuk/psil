@@ -8,10 +8,15 @@
 #include "Cell.h"
 
 class MemoryContext;
+class Handle;
+
+template<>
+class std::hash<Handle>;
 
 class Handle {
 public:
     friend MemoryContext;
+    friend class std::hash<Handle>;
 
     Handle(Cell *target = nullptr);
     Handle(int64_t val);
@@ -37,16 +42,25 @@ public:
 
     static Handle cons(const Handle &car, const Handle &cdr);
 
-    Handle car() const {
+    const Handle car() const {
         if (!_target) return Handle(nullptr);
         return dynamic_cast<ConsCell &>(*_target)._car.load();
     }
-    Handle cdr() const {
+    const Handle cdr() const {
         if (!_target) return Handle(nullptr);
         return dynamic_cast<ConsCell &>(*_target)._cdr.load();
     }
-    CellValType val() { return dynamic_cast<NumAtomCell &>(*_target)._val; }
-    std::string_view strval() { return dynamic_cast<StrAtomCell &>(*_target)._val; }
+    Handle car() {
+        if (!_target) return Handle(nullptr);
+        return dynamic_cast<ConsCell &>(*_target)._car.load();
+    }
+    Handle cdr() {
+        if (!_target) return Handle(nullptr);
+        return dynamic_cast<ConsCell &>(*_target)._cdr.load();
+    }
+
+    CellValType val() const { return dynamic_cast<NumAtomCell &>(*_target)._val; }
+    std::string_view strval() const { return dynamic_cast<StrAtomCell &>(*_target)._val; }
 
     CellType type() const {
         if (!_target) return CellType::CONS;
@@ -83,5 +97,19 @@ private:
 
     Cell *_target = nullptr;
 };
+
+namespace std {
+    template<>
+    class hash<Handle> {
+    public:
+        size_t operator()(const Handle &c) const {
+            if (c.type() == CellType::NUMATOM) return std::hash<CellValType>()(c.val());
+            else if (c.type() == CellType::STRATOM)
+                return std::hash<std::string_view>()(c.strval());
+            else
+                return std::hash<uintptr_t>()((uintptr_t) c.get());
+        }
+    };
+}// namespace std
 
 #endif//PSIL_HANDLE_H

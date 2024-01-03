@@ -21,7 +21,6 @@ void parse_options(int argc, char *argv[]) {
             continue;
         }
 
-
         if (arg.length() < 2 || arg.substr(0, 2) != "--") { throw std::invalid_argument("Can't parse argument " + arg); }
         std::string rest = arg.substr(2);
 
@@ -35,10 +34,10 @@ void parse_options(int argc, char *argv[]) {
         if (split.empty()) throw std::invalid_argument("Can't parse argument " + arg);
 
         if (split.at(0) == "log") {
-            if (split.size() != 3) throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL, instead have: " + arg);
+            if (split.size() != 3) throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL");
             try {
                 Logger::set_level(split.at(1), std::stoi(split.at(2)));
-            } catch (...) { throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL, instead have: " + arg); }
+            } catch (...) { throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL"); }
         } else if (split.size() == 1) {
             std::string str = split.at(0);
             if (str.back() != '+' && str.back() != '-') {
@@ -48,7 +47,7 @@ void parse_options(int argc, char *argv[]) {
         } else if (split.size() == 2) {
             try {
                 Options::set<size_t>(split.at(0), std::stoi(split.at(1)));
-            } catch (...) { throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL, instead have: " + arg); }
+            } catch (...) { throw std::invalid_argument("Options must be in format --OPTION:VALUE"); }
         } else {
             throw std::invalid_argument("Can't parse argument " + arg);
         }
@@ -64,33 +63,24 @@ int main(int argc, char *argv[]) {
 
         parse_options(argc, argv);
 
-        Handle repl;
-        {
-            Parser parser;
-            parser.loadStr("(READ EVAL PRINT STOP)");
-            repl = parser.parseExpr();
-        }
-        Handle epl;
-        {
-            Parser parser;
-            parser.loadStr("(EVAL PRINT STOP)");
-            epl = parser.parseExpr();
-        }
+        Handle repl = Parser::parse_str("(READ EVAL PRINT STOP)");
+        Handle epl = Parser::parse_str("(EVAL PRINT STOP)");
 
         VM vm;
 
         if (infile) {
             Handle parsed;
+
             std::stringstream buffer;
             buffer << "(";
             {
                 std::ifstream t(*infile);
+                if (!t.is_open()) throw std::invalid_argument("Requested file could not be opened");
                 buffer << t.rdbuf();
             }
             buffer << ")";
-            Parser parser;
-            parser.loadStr(buffer.str());
-            parsed = parser.parseExpr();
+
+            parsed = Parser::parse_str(buffer.str());
 
             Handle cur_expr = parsed;
             while (!cur_expr.null()) {
@@ -100,13 +90,14 @@ int main(int argc, char *argv[]) {
                 cur_expr = cur_expr.cdr();
             }
         }
+
         if (Options::get<bool>("repl"))
             while (true) {
-                std::cout << std::endl << "> ";
+                std::cout << "> ";
                 vm.loadControl(repl);
                 vm.run();
-                std::cout << std::endl;
             }
+
     } catch (const std::exception &e) {
         std::cerr << "\nError: " << e.what() << std::endl;
         return -1;

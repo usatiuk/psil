@@ -68,15 +68,15 @@ Handle Handle::makeNumCell(int64_t val) { return MemoryContext::get().create_cel
 Handle Handle::makeStrCell(std::string val) { return MemoryContext::get().create_cell<StrAtomCell>(std::move(val)); }
 
 void Handle::setcar(const Handle &car) {
-    MemoryContext::get().run_dirty<void>([&](std::function<void(Cell *)> dirty) -> void {
-        dirty(dynamic_cast<ConsCell &>(*_target)._car);
+    MemoryContext::get().run_dirty<void>([&](std::function<void(Cell *)> lost) -> void {
+        lost(dynamic_cast<ConsCell &>(*_target)._car);
         dynamic_cast<ConsCell &>(*_target)._car = car.get();
     });
 }
 
 void Handle::setcdr(const Handle &cdr) {
-    MemoryContext::get().run_dirty<void>([&](std::function<void(Cell *)> dirty) -> void {
-        dirty(dynamic_cast<ConsCell &>(*_target)._cdr);
+    MemoryContext::get().run_dirty<void>([&](std::function<void(Cell *)> lost) -> void {
+        lost(dynamic_cast<ConsCell &>(*_target)._cdr);
         dynamic_cast<ConsCell &>(*_target)._cdr = cdr.get();
     });
 }
