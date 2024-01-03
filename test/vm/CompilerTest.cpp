@@ -163,14 +163,18 @@ TEST(CompilerTest, GlobalDefineFnMulti) {
 TEST(CompilerTest, GlobalDefineFnRec) {
     std::stringstream ssin;
     std::stringstream ssout;
+    Options::set_bool("command_strs", false);
+    Logger::set_level("MemoryContext", Logger::INFO);
     {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr(
-                "(LDC (define (fib n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ) EVAL LDC (fib 10) EVAL PRINT STOP)");
+                "(LDC (define (fib n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ) EVAL LDC (fib 20) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
+    Options::set_bool("command_strs", true);
+    Logger::set_level("MemoryContext", Options::get_int("default_log_level"));
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "55");
+    EXPECT_EQ(ssout.str(), "6765");
 }

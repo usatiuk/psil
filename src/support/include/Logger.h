@@ -24,21 +24,19 @@ public:
     // 3 - debug
     // 4 - trace
     static void set_level(const std::string &tag, int level);
-    static void set_default_level(int level);
 
     static void set_out(std::ostream &out);
     static void set_out_err(std::ostream &out_err);
 
     static void reset();
 
-private:
     static Logger &get();
 
+private:
     std::unordered_map<std::string, int> _levels;
     static inline std::unordered_map<int, std::string> _level_names{
             {ALWAYS, "ALWAYS"}, {ERROR, "ERROR"}, {INFO, "INFO"}, {DEBUG, "DEBUG"}, {TRACE, "TRACE"},
     };
-    int _default_level = 1;
     std::chrono::time_point<std::chrono::high_resolution_clock> _start_time = std::chrono::high_resolution_clock::now();
     std::reference_wrapper<std::ostream> _out = std::cout;
     std::reference_wrapper<std::ostream> _out_err = std::cerr;

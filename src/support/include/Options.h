@@ -17,13 +17,14 @@ public:
     static void set_bool(const std::string &opt, bool val);
     static void set_int(const std::string &opt, size_t val);
     static void reset();
+    static Options &get();
 
 private:
     const static inline std::unordered_map<std::string, std::variant<size_t, bool>> _defaults{{"cell_limit", 50000U},
-                                                                                              {"command_strs", false}};
+                                                                                              {"command_strs", false},
+                                                                                              {"default_log_level", 1U}};
 
     std::unordered_map<std::string, std::variant<size_t, bool>> _current = _defaults;
-    static Options &get();
 };
 
 

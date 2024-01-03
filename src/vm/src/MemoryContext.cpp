@@ -197,6 +197,9 @@ void MemoryContext::gc_thread_entry() {
     }
 }
 MemoryContext &MemoryContext::get() {
+    // Ensure proper destruction order for tests
+    Options::get();
+    Logger::get();
     static MemoryContext mc;
     return mc;
 }

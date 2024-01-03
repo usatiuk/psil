@@ -11,6 +11,9 @@
 
 using namespace Command;
 
+
+static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD}};
+
 Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
 
@@ -56,9 +59,9 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
         Handle car = expr.car();
         Handle cdr = expr.cdr();
         if (car.atom()) {
-            if (car.strval() == "+") {
+            if (builtins.find(car.strval()) != builtins.end()) {
                 out.splice(compileArgsRaw(cdr));
-                out.append(make_cmd(ADD));
+                out.append(make_cmd(builtins.at(car.strval())));
             } else if (car.strval() == "read") {
                 out.append(make_cmd(READ));
             } else if (car.strval() == "lambda") {

@@ -12,7 +12,7 @@
 #include "Options.h"
 
 namespace Command {
-    enum Command : CellValType {
+    enum CommandE : CellValType {
         NIL = 1,
         LDC = 2,
         LD = 3,
