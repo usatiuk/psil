@@ -57,8 +57,10 @@ void parse_options(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     try {
+        // Just to be safe initialize everything in proper order
         Options::reset();
         Logger::reset();
+        MemoryContext::get();
 
         parse_options(argc, argv);
 
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]) {
         }
         if (Options::get_bool("repl"))
             while (true) {
-                std::cout << std::endl;
+                std::cout << std::endl << "> ";
                 vm.loadControl(repl);
                 vm.run();
                 std::cout << std::endl;
