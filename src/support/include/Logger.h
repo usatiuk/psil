@@ -8,7 +8,9 @@
 #include <chrono>
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <ostream>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 
@@ -40,6 +42,7 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> _start_time = std::chrono::high_resolution_clock::now();
     std::reference_wrapper<std::ostream> _out = std::cout;
     std::reference_wrapper<std::ostream> _out_err = std::cerr;
+    std::shared_mutex _mutex;
 };
 
 

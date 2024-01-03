@@ -6,10 +6,11 @@
 #define PSIL_OPTIONS_H
 
 
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <variant>
-
 class Options {
 public:
     static bool get_bool(const std::string &opt);
@@ -25,6 +26,7 @@ private:
                                                                                               {"default_log_level", 1U}};
 
     std::unordered_map<std::string, std::variant<size_t, bool>> _current = _defaults;
+    std::shared_mutex _mutex;
 };
 
 

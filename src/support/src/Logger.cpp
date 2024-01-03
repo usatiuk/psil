@@ -14,6 +14,7 @@ Logger &Logger::get() {
 }
 
 void Logger::log(const std::string &tag, const std::string &what, int level) {
+    std::shared_lock l(get()._mutex);
     int en_level = Options::get_int("default_log_level");
     if (get()._levels.find(tag) != get()._levels.end()) en_level = get()._levels.at(tag);
 
@@ -31,6 +32,7 @@ void Logger::log(const std::string &tag, const std::string &what, int level) {
 }
 
 void Logger::log(const std::string &tag, const std::function<void(std::ostream &)> &fn, int level) {
+    std::shared_lock l(get()._mutex);
     int en_level = Options::get_int("default_log_level");
     if (get()._levels.find(tag) != get()._levels.end()) en_level = get()._levels.at(tag);
 
@@ -41,7 +43,19 @@ void Logger::log(const std::string &tag, const std::function<void(std::ostream &
     log(tag, out.str(), level);
 }
 
-void Logger::set_level(const std::string &tag, int level) { get()._levels[tag] = level; }
-void Logger::set_out(std::ostream &out) { get()._out = out; }
-void Logger::set_out_err(std::ostream &out_err) { get()._out_err = out_err; }
-void Logger::reset() { get()._levels = {}; }
+void Logger::set_level(const std::string &tag, int level) {
+    std::lock_guard l(get()._mutex);
+    get()._levels[tag] = level;
+}
+void Logger::set_out(std::ostream &out) {
+    std::lock_guard l(get()._mutex);
+    get()._out = out;
+}
+void Logger::set_out_err(std::ostream &out_err) {
+    std::lock_guard l(get()._mutex);
+    get()._out_err = out_err;
+}
+void Logger::reset() {
+    std::lock_guard l(get()._mutex);
+    get()._levels = {};
+}
