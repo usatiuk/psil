@@ -95,3 +95,65 @@ TEST(CompilerTest, RecursiveFn) {
     ssout.flush();
     EXPECT_EQ(ssout.str(), "55");
 }
+
+TEST(CompilerTest, GlobalDefine) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (define (one) 1) EVAL LDC (one) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "1");
+}
+
+
+TEST(CompilerTest, GlobalDefineFn) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (define (one x y) (+ x y)) EVAL LDC (one 2 3) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "5");
+}
+
+TEST(CompilerTest, GlobalDefineFnMulti) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (define (one x y) (+ x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "6");
+}
+
+TEST(CompilerTest, GlobalDefineFnRec) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr(
+                "(LDC (define (fib n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ) EVAL LDC (fib 10) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "55");
+}

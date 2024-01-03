@@ -69,6 +69,10 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
                 out.append(Handle(SEL));
                 out.append(compile(cdr.cdr().car(), fake_env, Handle(JOIN)));
                 out.append(compile(cdr.cdr().cdr().car(), fake_env, Handle(JOIN)));
+            } else if (car.strval() == "define") {
+                fake_env.car().append(Handle(std::string(cdr.car().car().strval())));
+                out.append(Handle(LDG));
+                out.append(compile(cdr.cdr().car(), Handle::cons(cdr.car().cdr(), fake_env), Handle(RET)));
             } else if (car.strval() == "let" || car.strval() == "letrec") {
                 std::vector<std::pair<Handle, Handle>> argBody;
 
@@ -87,17 +91,18 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
                 }
 
                 Handle newenv = Handle::cons(argNames, fake_env);
-                if (car.strval() == "let") out.splice(compileArgsList(argBodies, fake_env));
-                else if (car.strval() == "letrec") {
+                if (car.strval() == "let") {
+                    out.splice(compileArgsList(argBodies, fake_env));
+                    out.append(Handle(LDF));
+                    out.append(compile(body, newenv, Handle(RET)));
+                    out.append(Handle(AP));
+                } else if (car.strval() == "letrec") {
                     out.append(Handle(DUM));
                     out.splice(compileArgsList(argBodies, newenv));
-                }
-
-                out.append(Handle(LDF));
-                out.append(compile(body, newenv, Handle(RET)));
-                if (car.strval() == "let") out.append(Handle(AP));
-                else
+                    out.append(Handle(LDF));
+                    out.append(compile(body, newenv, Handle(RET)));
                     out.append(Handle(RAP));
+                }
             } else {
                 out.splice(compileArgsList(cdr, fake_env));
 

@@ -27,8 +27,10 @@ public:
     void step();
 
 private:
+    Handle _globals_names = Handle::cons(Handle::cons(nullptr, nullptr), nullptr);
+    Handle _globals_vals = Handle::cons(nullptr, nullptr);
     Handle _s = Handle::cons(nullptr, nullptr);
-    Handle _e = Handle::cons(nullptr, nullptr);
+    Handle _e = Handle::cons(_globals_vals, nullptr);
     Handle _c = Handle::cons(nullptr, nullptr);
     Handle _d = Handle::cons(nullptr, nullptr);
     bool _stop = false;

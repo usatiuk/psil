@@ -36,6 +36,7 @@ namespace Command {
         READ = 20,
 
         CONS = 21,
+        LDG = 22,
     };
 
     static inline std::unordered_map<std::string_view, CellValType> str_to_cmd{

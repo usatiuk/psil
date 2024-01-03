@@ -14,7 +14,7 @@
 
 class Logger {
 public:
-    enum LogLevel { DISABLED = 0, ERROR = 1, INFO = 2, DEBUG = 3, TRACE = 4 };
+    enum LogLevel { ALWAYS = 0, ERROR = 1, INFO = 2, DEBUG = 3, TRACE = 4 };
     static void log(const std::string &tag, const std::string &what, int level);
     static void log(const std::string &tag, const std::function<void(std::ostream &)> &fn, int level);
 
@@ -34,10 +34,7 @@ private:
 
     std::unordered_map<std::string, int> _levels;
     static inline std::unordered_map<int, std::string> _level_names{
-            {ERROR, "ERROR"},
-            {INFO, "INFO"},
-            {DEBUG, "DEBUG"},
-            {TRACE, "TRACE"},
+            {ALWAYS, "ALWAYS"}, {ERROR, "ERROR"}, {INFO, "INFO"}, {DEBUG, "DEBUG"}, {TRACE, "TRACE"},
     };
     int _default_level = 1;
     std::chrono::time_point<std::chrono::high_resolution_clock> _start_time = std::chrono::high_resolution_clock::now();

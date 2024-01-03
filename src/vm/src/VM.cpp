@@ -129,7 +129,7 @@ void VM::step() {
         _outstream << _s.pop().val();
     } else if (poppedCmd == EVAL) {
         Handle code = _s.pop();
-        Handle newc = Compiler::compile(code, nullptr);
+        Handle newc = Compiler::compile(code, _globals_names);
         Logger::log(
                 "Compiler",
                 [&](std::ostream &out) {
@@ -140,6 +140,8 @@ void VM::step() {
                 Logger::DEBUG);
         newc.splice(_c);
         _c = newc;
+    } else if (poppedCmd == LDG) {
+        _globals_vals.append(Handle::cons(_c.pop(), _e));
     } else if (poppedCmd == PRINT) {
         _outstream << _s.pop();
     } else if (poppedCmd == READ) {
