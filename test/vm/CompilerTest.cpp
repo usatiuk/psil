@@ -14,6 +14,7 @@ public:
 
     void SetUp() override {
         Options::set_bool("command_strs", true);
+        Logger::set_level("VM", Logger::DEBUG);
         Logger::set_level("Compiler", Logger::DEBUG);
     }
 
@@ -273,7 +274,7 @@ TEST(CompilerTest, GlobalDefineFnRec) {
     std::stringstream ssin;
     std::stringstream ssout;
     Options::set_bool("command_strs", false);
-    Logger::set_level("MemoryContext", Logger::INFO);
+    Logger::set_level("VM", Options::get_int("default_log_level"));
     {
         VM vm(ssin, ssout);
         Parser parser;
@@ -283,7 +284,7 @@ TEST(CompilerTest, GlobalDefineFnRec) {
         vm.run();
     }
     Options::set_bool("command_strs", true);
-    Logger::set_level("MemoryContext", Options::get_int("default_log_level"));
+    Logger::set_level("VM", Logger::DEBUG);
     ssout.flush();
     EXPECT_EQ(ssout.str(), "6765\n");
 }

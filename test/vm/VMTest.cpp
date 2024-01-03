@@ -8,7 +8,7 @@ public:
 
     void SetUp() override {
         Options::set_int("cell_limit", 1000);
-        Logger::set_level("MemoryContext", Logger::INFO);
+        Logger::set_level("Compiler", Logger::DEBUG);
     }
 
     void TearDown() override {
