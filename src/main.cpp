@@ -1,14 +1,27 @@
+#include <fstream>
 #include <iostream>
+#include <optional>
+#include <sstream>
 #include <stdexcept>
 
 #include "MemoryContext.h"
 #include "Parser.h"
 #include "VM.h"
 
+std::optional<std::string> infile;
+
 void parse_options(int argc, char *argv[]) {
 
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
+
+        if (arg == "-f") {
+            if (++i >= argc) throw std::invalid_argument("-f given but no file");
+            infile = argv[i];
+            continue;
+        }
+
+
         if (arg.length() < 2 || arg.substr(0, 2) != "--") { throw std::invalid_argument("Can't parse argument " + arg); }
         std::string rest = arg.substr(2);
 
@@ -55,14 +68,43 @@ int main(int argc, char *argv[]) {
             parser.loadStr("(READ EVAL PRINT STOP)");
             repl = parser.parseExpr();
         }
+        Handle epl;
+        {
+            Parser parser;
+            parser.loadStr("(EVAL PRINT STOP)");
+            epl = parser.parseExpr();
+        }
+
         VM vm;
 
-        while (true) {
-            std::cout << std::endl;
-            vm.loadControl(repl);
-            vm.run();
-            std::cout << std::endl;
+        if (infile) {
+            Handle parsed;
+            std::stringstream buffer;
+            buffer << "(";
+            {
+                std::ifstream t(*infile);
+                buffer << t.rdbuf();
+            }
+            buffer << ")";
+            Parser parser;
+            parser.loadStr(buffer.str());
+            parsed = parser.parseExpr();
+
+            Handle cur_expr = parsed;
+            while (!cur_expr.null()) {
+                vm.loadStack(Handle::cons(cur_expr.car(), nullptr));
+                vm.loadControl(epl);
+                vm.run();
+                cur_expr = cur_expr.cdr();
+            }
         }
+        if (Options::get_bool("repl"))
+            while (true) {
+                std::cout << std::endl;
+                vm.loadControl(repl);
+                vm.run();
+                std::cout << std::endl;
+            }
     } catch (const std::exception &e) {
         std::cerr << "\nError: " << e.what() << std::endl;
         return -1;

@@ -159,7 +159,7 @@ void VM::step() {
     } else if (poppedCmd == LDG) {
         _globals_vals.append(Handle::cons(_c.pop(), _e));
     } else if (poppedCmd == PRINT) {
-        _outstream << _s.pop();
+        if (!_s.null()) _outstream << _s.pop() << std::endl;
     } else if (poppedCmd == READ) {
         std::string read;
         std::getline(_instream, read);

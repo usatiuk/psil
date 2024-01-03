@@ -24,6 +24,8 @@ public:
         _stop = false;
     }
 
+    void loadStack(const Handle &h) { _s = h; }
+
     void step();
 
 private:
