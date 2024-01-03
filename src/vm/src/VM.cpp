@@ -36,15 +36,11 @@ void VM::step() {
 
         Handle curFrame = _e;
 
-        for (int i = 1; i < frame; i++) {
-            curFrame = curFrame.cdr();
-        }
+        for (int i = 1; i < frame; i++) { curFrame = curFrame.cdr(); }
 
         Handle curArg = curFrame.car();
 
-        for (int i = 1; i < arg; i++) {
-            curArg = curArg.cdr();
-        }
+        for (int i = 1; i < arg; i++) { curArg = curArg.cdr(); }
 
         _s.push(curArg.car());
     } else if (poppedH == SEL) {
@@ -130,10 +126,14 @@ void VM::step() {
     } else if (poppedH == EVAL) {
         Handle code = _s.pop();
         Handle newc = Compiler::compile(code, nullptr);
-        std::cerr << "compiled:\n";
-        std::cerr << "(" << code << ")\n";
-        std::cerr << "to:\n";
-        std::cerr << "(" << newc << ")\n";
+        Logger::log(
+                "Compiler",
+                [&](std::ostream &out) {
+                    out << "Compiled (" << code << ")\n";
+                    out << "to\n";
+                    out << "(" << newc << ")";
+                },
+                Logger::DEBUG);
         newc.splice(_c);
         _c = newc;
     } else if (poppedH == PRINT) {

@@ -10,10 +10,7 @@
 #include <sstream>
 #include <unordered_set>
 
-
-MemoryContext::MemoryContext() {
-    _gc_thread = std::thread(std::bind(&MemoryContext::gc_thread_entry, this));
-}
+MemoryContext::MemoryContext() { _gc_thread = std::thread(std::bind(&MemoryContext::gc_thread_entry, this)); }
 
 MemoryContext::~MemoryContext() {
     // Three times because the first one might not start it as it's been running already
@@ -35,22 +32,20 @@ void MemoryContext::add_root(Cell *c) {
     {
         std::lock_guard l(_new_roots_lock);
         _new_roots[c]++;
-        //        {
-        //            std::stringstream out;
-        //            out << "new root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c] << "\n";
-        //            std::cerr << out.str();
-        //        }
+        Logger::log(
+                "MemoryContext",
+                [&](std::ostream &out) { out << "new root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c]; },
+                Logger::TRACE);
     }
 }
 void MemoryContext::remove_root(Cell *c) {
     {
         std::lock_guard l(_new_roots_lock);
         _new_roots[c]--;
-        //        {
-        //            std::stringstream out;
-        //            out << "del root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c] << "\n";
-        //            std::cerr << out.str();
-        //        }
+        Logger::log(
+                "MemoryContext",
+                [&](std::ostream &out) { out << "del root: " << c << " T: " << static_cast<int>(c->_type) << " NUM: " << _new_roots[c]; },
+                Logger::TRACE);
         if (_new_roots[c] == 0) _new_roots.erase(c);
     }
 }
@@ -63,11 +58,7 @@ void MemoryContext::gc_thread_entry() {
         }
         if (_gc_thread_stop) return;
 
-        //        {
-        //            std::stringstream out;
-        //            out << "gc start " << '\n';
-        //            std::cerr << out.str();
-        //        }
+        Logger::log("MemoryContext", [&](std::ostream &out) { out << "gc start "; }, Logger::DEBUG);
         auto gcstart = std::chrono::high_resolution_clock::now();
 
         std::queue<Cell *> toVisit;
@@ -80,21 +71,14 @@ void MemoryContext::gc_thread_entry() {
                 if (c == nullptr) continue;
                 if (c->_live) continue;
                 c->_live = true;
-                //
-                //                {
-                //                    std::stringstream out;
-                //                    out << "processing c " << c << " " << static_cast<int>(c->_type) << "\n";
-                //                    std::cerr << out.str();
-                //                }
+                Logger::log(
+                        "MemoryContext", [&](std::ostream &out) { out << "visiting c " << c << " " << static_cast<int>(c->_type); },
+                        Logger::TRACE);
 
                 if (c->_type == CellType::CONS) {
                     ConsCell &cc = dynamic_cast<ConsCell &>(*c);
-                    //                                        {std::stringstream out; out  << "processing car " << cc._car << "\n"; std::cerr<<out.str();}
                     toVisit.emplace(cc._car);
-                    //                    {std::stringstream out; out  << "real car " << toVisit.back() << "\n"; std::cerr<<out.str();}
-                    //                    {std::stringstream out; out  << "processing cdr " << cc._cdr << "\n"; std::cerr<<out.str();}
                     toVisit.emplace(cc._cdr);
-                    //                    {std::stringstream out; out  << "real cdr " << toVisit.back() << "\n"; std::cerr<<out.str();}
                 }
             }
         };
@@ -114,51 +98,38 @@ void MemoryContext::gc_thread_entry() {
 
 
             for (auto const &r: new_roots) {
-                //                {
-                //                    std::stringstream out;
-                //                    out << "processing new " << r.first << " diff " << r.second << "\n";
-                //                    std::cerr << out.str();
-                //                }
+                Logger::log(
+                        "MemoryContext", [&](std::ostream &out) { out << "processing new " << r.first << " diff " << r.second; },
+                        Logger::TRACE);
                 if (r.second == 0) continue;
                 _roots[r.first] += r.second;
-                if (_roots[r.first] <= 0)
-                    _roots.erase(r.first);
+                if (_roots[r.first] <= 0) _roots.erase(r.first);
             }
 
             auto stop = std::chrono::high_resolution_clock::now();
-            {
-                std::stringstream out;
-                out << "New roots time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
-                std::cout << out.str();
-            }
+
+            Logger::log("MemoryContext",
+                        "New roots processing time: " +
+                                std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count()),
+                        Logger::INFO);
         }
 
         {
             auto start = std::chrono::high_resolution_clock::now();
-            std::for_each(_cells.begin(), _cells.end(), [&](Cell *c) {
-                c->_live = false;
-            });
+            std::for_each(_cells.begin(), _cells.end(), [&](Cell *c) { c->_live = false; });
 
             for (const auto &r: _roots) {
-                //                {
-                //                    std::stringstream out;
-                //                    out << "processing r " << r.first << " diff " << r.second << "\n";
-                //                    std::cerr << out.str();
-                //                }
+                Logger::log(
+                        "MemoryContext", [&](std::ostream &out) { out << "processing r " << r.first << " diff " << r.second; },
+                        Logger::DEBUG);
                 toVisit.emplace(r.first);
             }
             visitAll();
             auto stop = std::chrono::high_resolution_clock::now();
-            //            {
-            //                std::stringstream out;
-            //                out << "Scanned " << _roots.size() << " roots" << std::endl;
-            //                std::cerr << out.str();
-            //            }
-            {
-                std::stringstream out;
-                out << "Roots scan time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
-                std::cout << out.str();
-            }
+            Logger::log("MemoryContext", [&](std::ostream &out) { out << "Scanned " << _roots.size() << " roots"; }, Logger::DEBUG);
+            Logger::log("MemoryContext",
+                        "Roots scan time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count()),
+                        Logger::INFO);
         }
 
         {
@@ -170,11 +141,7 @@ void MemoryContext::gc_thread_entry() {
             }
             while (!dirtied.empty()) {
                 for (const auto &r: dirtied) {
-                    //                    {
-                    //                        std::stringstream out;
-                    //                        out << "processing dirty " << r << "\n";
-                    //                        std::cerr << out.str();
-                    //                    }
+                    Logger::log("MemoryContext", [&](std::ostream &out) { out << "processing dirty " << r; }, Logger::DEBUG);
                     toVisit.emplace(r);
                 }
                 visitAll();
@@ -187,11 +154,9 @@ void MemoryContext::gc_thread_entry() {
             }
 
             auto stop = std::chrono::high_resolution_clock::now();
-            {
-                std::stringstream out;
-                out << "Dirty mark time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
-                std::cout << out.str();
-            }
+            Logger::log("MemoryContext",
+                        "Dirty scan time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count()),
+                        Logger::INFO);
         }
         {
             auto start = std::chrono::high_resolution_clock::now();
@@ -201,13 +166,7 @@ void MemoryContext::gc_thread_entry() {
             _cells.remove_if([&](Cell *l) {
                 if (!l->_live) {
                     freed += 1;
-
-                    //                    {
-                    //                        std::stringstream out;
-                    //                        out << "deleting: " << l << "\n";
-                    //                        std::cerr << out.str();
-                    //                    }
-
+                    Logger::log("MemoryContext", [&](std::ostream &out) { out << "deleting: " << l; }, Logger::DEBUG);
                     delete l;
                     return true;
                 }
@@ -215,25 +174,17 @@ void MemoryContext::gc_thread_entry() {
             });
 
             auto stop = std::chrono::high_resolution_clock::now();
-            {
-                std::stringstream out;
-                out << "Sweep time: " << std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() << "\n";
-                std::cout << out.str();
-            }
+            Logger::log("MemoryContext",
+                        "Sweep time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count()),
+                        Logger::INFO);
             _cells_num = _cells.size();
-            {
-                std::stringstream out;
-                out << "GC Freed " << freed << " cells left: " << _cells_num << " \n";
-                std::cout << out.str();
-            }
+            Logger::log("MemoryContext", "GC Freed: " + std::to_string(freed) + " cells left: " + std::to_string(_cells_num), Logger::INFO);
         }
 
         auto gcstop = std::chrono::high_resolution_clock::now();
-        {
-            std::stringstream out;
-            out << "GC total time: " << std::chrono::duration_cast<std::chrono::microseconds>(gcstop - gcstart).count() << "\n";
-            std::cout << out.str();
-        }
+        Logger::log("MemoryContext",
+                    "GC total time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(gcstop - gcstart).count()),
+                    Logger::INFO);
 
 
         {

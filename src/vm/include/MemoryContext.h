@@ -18,6 +18,7 @@
 
 #include "Cell.h"
 #include "Handle.h"
+#include "Logger.h"
 
 class Handle;
 
@@ -39,11 +40,8 @@ public:
     void request_gc_and_wait() {
         std::unique_lock l(_gc_done_m);
         _gc_done = false;
-        {
-            request_gc();
-        }
-        if (!_gc_done)
-            _gc_done_cv.wait(l, [&] { return _gc_done.load(); });
+        { request_gc(); }
+        if (!_gc_done) _gc_done_cv.wait(l, [&] { return _gc_done.load(); });
     }
 
     void request_gc() {
@@ -52,21 +50,16 @@ public:
         _gc_request_cv.notify_all();
     }
 
-    size_t cell_count() {
-        return _cells_num;
-    }
+    size_t cell_count() { return _cells_num; }
 
     template<typename R>
     R run_dirty(const std::function<R(std::function<void(Cell *)>)> &f) {
         std::lock_guard l(_gc_dirty_notif_queue_lock);
         return f([&](Cell *c) {
-//            {
-//                std::stringstream out;
-//                out << "marked dirty: " << c << " \n";
-//                std::cerr << out.str();
-//            }
-
-            _gc_dirty_notif_queue.emplace(c); });
+            if (c == nullptr) return;
+            Logger::log("MemoryContext", [&](std::ostream &out) { out << "marked dirty: " << c; }, Logger::DEBUG);
+            _gc_dirty_notif_queue.emplace(c);
+        });
     }
 
 private:
@@ -81,7 +74,7 @@ private:
 
         if ((_cells_num + tcellnum) >= (_cell_limit)) {
             // We might need to run GC twice as it has to process the messages;
-            std::cerr << "Running forced GC" << std::endl;
+            Logger::log("MemoryContext", "Running forced gc", Logger::ERROR);
             for (int i = 0; i < 3 && (_cells_num + tcellnum) >= (_cell_limit); i++) {
                 request_gc_and_wait();
                 {
@@ -90,6 +83,8 @@ private:
                 }
             }
             if ((_cells_num + tcellnum) >= (_cell_limit)) {
+                Logger::log("MemoryContext", "Out of cells", Logger::ERROR);
+
                 throw std::runtime_error("Out of cells");
             }
         }
@@ -100,9 +95,7 @@ private:
             std::lock_guard tmplg(_new_roots_lock);
             Handle ret(cell);
             _temp_cells.emplace_back(cell);
-            if ((_cells_num + _temp_cells.size() + 1) >= (size_t) (_cell_limit / 2)) {
-                request_gc();
-            }
+            if ((_cells_num + _temp_cells.size() + 1) >= (size_t) (_cell_limit / 2)) { request_gc(); }
             return ret;
         }
     }
