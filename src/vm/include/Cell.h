@@ -5,19 +5,15 @@
 #ifndef PSIL_CELL_H
 #define PSIL_CELL_H
 
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <utility>
-#include <atomic>
 
-enum class CellType {
-    NUMATOM,
-    STRATOM,
-    CONS
-};
+enum class CellType { NUMATOM, STRATOM, CONS };
 
 using CellValType = int64_t;
 
@@ -37,9 +33,7 @@ struct NumAtomCell : public Cell {
 
     CellValType _val;
 
-    void print(std::ostream &out) override {
-        out << _val;
-    }
+    void print(std::ostream &out) override { out << _val; }
 };
 
 struct StrAtomCell : public Cell {
@@ -48,9 +42,7 @@ struct StrAtomCell : public Cell {
 
     std::string _val;
 
-    void print(std::ostream &out) override {
-        out << _val;
-    }
+    void print(std::ostream &out) override { out << _val; }
 };
 
 struct ConsCell : public Cell {

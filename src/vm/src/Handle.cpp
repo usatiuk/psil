@@ -7,18 +7,15 @@
 #include "MemoryContext.h"
 
 Handle::Handle(Cell *target) : _target(target) {
-    if (target != nullptr)
-        MemoryContext::get().add_root(target);
+    if (target != nullptr) MemoryContext::get().add_root(target);
 }
 
 Handle::~Handle() {
-    if (_target != nullptr)
-        MemoryContext::get().remove_root(_target);
+    if (_target != nullptr) MemoryContext::get().remove_root(_target);
 }
 
 Handle::Handle(Handle const &other) : _target(other._target) {
-    if (_target != nullptr)
-        MemoryContext::get().add_root(_target);
+    if (_target != nullptr) MemoryContext::get().add_root(_target);
 }
 
 Handle &Handle::operator=(Handle other) {
@@ -37,9 +34,7 @@ Handle Handle::pop() {
     return ret;
 }
 
-void Handle::push(const Handle &what) {
-    *this = cons(what, *this);
-}
+void Handle::push(const Handle &what) { *this = cons(what, *this); }
 
 void Handle::append(const Handle &what) {
     if (_target == nullptr) *this = cons(nullptr, nullptr);
@@ -62,20 +57,15 @@ void Handle::splice(const Handle &what) {
         *this = what;
         return;
     }
-    while (cur.cdr().get() != nullptr)
-        cur = cur.cdr();
+    while (cur.cdr().get() != nullptr) cur = cur.cdr();
     if (what.atom()) cur.setcdr(Handle::cons(what, nullptr));
     else
         cur.setcdr(what);
 }
 
-Handle Handle::makeNumCell(int64_t val) {
-    return MemoryContext::get().create_cell<NumAtomCell>(val);
-}
+Handle Handle::makeNumCell(int64_t val) { return MemoryContext::get().create_cell<NumAtomCell>(val); }
 
-Handle Handle::makeStrCell(std::string val) {
-    return MemoryContext::get().create_cell<StrAtomCell>(std::move(val));
-}
+Handle Handle::makeStrCell(std::string val) { return MemoryContext::get().create_cell<StrAtomCell>(std::move(val)); }
 
 void Handle::setcar(const Handle &car) {
     MemoryContext::get().run_dirty<void>([&](std::function<void(Cell *)> dirty) -> void {
@@ -90,9 +80,5 @@ void Handle::setcdr(const Handle &cdr) {
         dynamic_cast<ConsCell &>(*_target)._cdr = cdr.get();
     });
 }
-Handle::Handle(int64_t val) {
-    *this = Handle::makeNumCell(val);
-}
-Handle::Handle(std::string strval) {
-    *this = Handle::makeStrCell(std::move(strval));
-}
+Handle::Handle(int64_t val) { *this = Handle::makeNumCell(val); }
+Handle::Handle(std::string strval) { *this = Handle::makeStrCell(std::move(strval)); }

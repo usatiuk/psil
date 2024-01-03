@@ -87,7 +87,8 @@ TEST(CompilerTest, RecursiveFn) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("(LDC (letrec ((fib (lambda (n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ))) (fib 10)) EVAL PRINT STOP)");
+        parser.loadStr(
+                "(LDC (letrec ((fib (lambda (n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ))) (fib 10)) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }

@@ -46,9 +46,7 @@ public:
         return _target->_type;
     }
 
-    bool atom() const {
-        return type() != CellType::CONS;
-    }
+    bool atom() const { return type() != CellType::CONS; }
 
     bool null() {
         if (!_target) return true;
@@ -67,8 +65,7 @@ public:
     void setcdr(const Handle &cdr);
 
     friend std::ostream &operator<<(std::ostream &stream, const Handle &h) {
-        if (h._target)
-            h._target->print(stream);
+        if (h._target) h._target->print(stream);
         return stream;
     }
 

@@ -11,9 +11,7 @@
 #include "VM.h"
 
 
-void Parser::loadStr(std::string_view input) {
-    _tokenizer.load(input);
-}
+void Parser::loadStr(std::string_view input) { _tokenizer.load(input); }
 
 Handle Parser::parseExpr() {
     while (!_tokenizer.empty()) {
@@ -55,9 +53,7 @@ std::string Parser::Tokenizer::getNext() {
     return ret;
 }
 
-std::string_view Parser::Tokenizer::peek() const {
-    return _tokens.front();
-}
+std::string_view Parser::Tokenizer::peek() const { return _tokens.front(); }
 
 void Parser::Tokenizer::load(std::string_view input) {
     std::string_view::size_type curpos = input.find_first_not_of(' ');
@@ -81,6 +77,4 @@ void Parser::Tokenizer::load(std::string_view input) {
     }
 }
 
-bool Parser::Tokenizer::empty() const {
-    return _tokens.empty();
-}
+bool Parser::Tokenizer::empty() const { return _tokens.empty(); }

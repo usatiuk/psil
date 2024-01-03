@@ -4,8 +4,8 @@
 
 #include "Compiler.h"
 
-#include <string>
 #include <functional>
+#include <string>
 
 Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
     Handle out;
@@ -83,8 +83,7 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
                 }
 
                 Handle newenv = Handle::cons(argNames, fake_env);
-                if (car.strval() == "let")
-                    out.splice(compileArgsList(argBodies, fake_env));
+                if (car.strval() == "let") out.splice(compileArgsList(argBodies, fake_env));
                 else if (car.strval() == "letrec") {
                     out.append(Handle("DUM"));
                     out.splice(compileArgsList(argBodies, newenv));
@@ -92,8 +91,7 @@ Handle Compiler::compile(Handle src, Handle fake_env, Handle suffix) {
 
                 out.append(Handle("LDF"));
                 out.append(compile(body, newenv, Handle("RET")));
-                if (car.strval() == "let")
-                    out.append(Handle("AP"));
+                if (car.strval() == "let") out.append(Handle("AP"));
                 else
                     out.append(Handle("RAP"));
             } else {
