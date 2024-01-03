@@ -171,10 +171,16 @@ void VM::step() {
         _stop = true;
     } else if (poppedCmd == ADD) {
         _s.push(_s.pop().val() + _s.pop().val());
+    } else if (poppedCmd == MULT) {
+        _s.push(_s.pop().val() * _s.pop().val());
     } else if (poppedCmd == SUB) {
         CellValType a1 = _s.pop().val();
         CellValType a2 = _s.pop().val();
         _s.push(a1 - a2);
+    } else if (poppedCmd == DIV) {
+        CellValType a1 = _s.pop().val();
+        CellValType a2 = _s.pop().val();
+        _s.push(a1 / a2);
     } else if (poppedCmd == EQ) {
         _s.push(_s.pop() == _s.pop() ? 1 : 0);
     } else if (poppedCmd == LT) {

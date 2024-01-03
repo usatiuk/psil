@@ -5,7 +5,7 @@ FAILED=()
 
 for FILE in *.psil; do
       echo "TESTING $FILE"
-      $PSIL -f $FILE --repl- > $FILE.res
+      $PSIL -f $FILE --repl- --default_log_level:0 > $FILE.res
       if [ $? -ne 0 ]; then
           FAILED+=("test-"$FILE)
           continue

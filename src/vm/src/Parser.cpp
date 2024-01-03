@@ -63,7 +63,7 @@ std::string_view Parser::Tokenizer::peek() const { return _tokens.front(); }
 void Parser::Tokenizer::load(std::string_view input) {
     std::string_view::size_type curpos = input.find_first_not_of(std::string{' ', '\n', '\r'});
 
-    static const std::string alnum = "-+><?=!0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    static const std::string alnum = "-+><?=!*/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     static const std::string special = "().";
 
     while (curpos != std::string_view::npos) {

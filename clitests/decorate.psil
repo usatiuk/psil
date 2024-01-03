@@ -1,0 +1,20 @@
+(define (decorate f g)
+  (lambda (x) (g (f x)))
+)
+
+(define (foldl op acc l)
+    (if (nil? l)
+        acc
+        (op (car l) (foldl op acc (cdr l)))
+    )
+)
+
+(define (plus a b)
+    (+ a b)
+)
+
+((decorate (lambda (x) (+ x 1)) (lambda (x) (+ x 2))) 1)
+((decorate (lambda (lst) (foldl plus 0 lst)) (lambda (x) (* x x))) (quote(1 2 3)))
+((decorate (lambda (lst) (foldl plus 0 lst)) (lambda (x) (/ x 2))) (quote(1 2 3)))
+((decorate (lambda (lst) (foldl plus 0 lst)) (lambda (x) (= x 0))) (nil))
+((decorate (lambda (lst) (foldl plus 0 lst)) (lambda (x) (= x 0))) (quote(1)))

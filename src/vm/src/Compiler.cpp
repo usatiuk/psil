@@ -17,9 +17,9 @@
 using namespace Command;
 
 
-static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD},   {"-", SUB},     {"cons", CONS}, {"car", CAR},
-                                                               {"cdr", CDR}, {"=", EQ},      {">", GT},      {"<", LT},
-                                                               {"nil", NIL}, {"nil?", NILC}, {"atom", ATOM}};
+static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD},     {"-", SUB},  {"cons", CONS}, {"car", CAR}, {"cdr", CDR},
+                                                               {"=", EQ},      {">", GT},   {"<", LT},      {"nil", NIL}, {"nil?", NILC},
+                                                               {"atom", ATOM}, {"*", MULT}, {"/", DIV}};
 
 Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
