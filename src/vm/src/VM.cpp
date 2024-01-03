@@ -149,8 +149,8 @@ void VM::step() {
         Logger::log(
                 "Compiler",
                 [&](std::ostream &out) {
-                    out << "Compiled (" << code << ")\n";
-                    out << "to\n";
+                    out << "Compiled (" << code << ")";
+                    out << " to ";
                     out << "(" << newc << ")";
                 },
                 Logger::DEBUG);
