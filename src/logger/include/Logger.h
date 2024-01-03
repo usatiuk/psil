@@ -29,6 +29,8 @@ public:
     static void set_out(std::ostream &out);
     static void set_out_err(std::ostream &out_err);
 
+    static void reset();
+
 private:
     static Logger &get();
 

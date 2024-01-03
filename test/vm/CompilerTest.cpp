@@ -4,8 +4,26 @@
 #include <gtest/gtest.h>
 
 #include "MemoryContext.h"
+#include "Options.h"
 #include "Parser.h"
 #include "VM.h"
+
+class Environment : public ::testing::Environment {
+public:
+    ~Environment() override {}
+
+    void SetUp() override {
+        Options::set_bool("command_strs", true);
+        Logger::set_level("Compiler", Logger::DEBUG);
+    }
+
+    void TearDown() override {
+        Options::reset();
+        Logger::reset();
+    }
+};
+
+testing::Environment *const env = testing::AddGlobalTestEnvironment(new Environment);
 
 TEST(CompilerTest, BasicHello) {
     std::stringstream ssin;
@@ -146,7 +164,6 @@ TEST(CompilerTest, GlobalDefineFnRec) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr(

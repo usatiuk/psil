@@ -44,3 +44,4 @@ void Logger::set_level(const std::string &tag, int level) { get()._levels[tag] =
 void Logger::set_out(std::ostream &out) { get()._out = out; }
 void Logger::set_out_err(std::ostream &out_err) { get()._out_err = out_err; }
 void Logger::set_default_level(int level) { get()._default_level = level; }
+void Logger::reset() { get()._levels = {}; }
