@@ -13,7 +13,7 @@ public:
     ~Environment() override {}
 
     void SetUp() override {
-        Options::set_bool("command_strs", true);
+        Options::set<bool>("command_strs", true);
         Logger::set_level("VM", Logger::DEBUG);
         Logger::set_level("Compiler", Logger::DEBUG);
     }
@@ -273,8 +273,8 @@ TEST(CompilerTest, GlobalDefineFnMultiTwo) {
 TEST(CompilerTest, GlobalDefineFnRec) {
     std::stringstream ssin;
     std::stringstream ssout;
-    Options::set_bool("command_strs", false);
-    Logger::set_level("VM", Options::get_int("default_log_level"));
+    Options::set<bool>("command_strs", false);
+    Logger::set_level("VM", Options::get<size_t>("default_log_level"));
     {
         VM vm(ssin, ssout);
         Parser parser;
@@ -283,7 +283,7 @@ TEST(CompilerTest, GlobalDefineFnRec) {
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
-    Options::set_bool("command_strs", true);
+    Options::set<bool>("command_strs", true);
     Logger::set_level("VM", Logger::DEBUG);
     ssout.flush();
     EXPECT_EQ(ssout.str(), "6765\n");

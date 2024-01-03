@@ -44,10 +44,10 @@ void parse_options(int argc, char *argv[]) {
             if (str.back() != '+' && str.back() != '-') {
                 throw std::invalid_argument("Bool options must be in format --option[+/-], instead have" + arg);
             }
-            Options::set_bool(str.substr(0, str.length() - 1), str.back() == '+' ? true : false);
+            Options::set<bool>(str.substr(0, str.length() - 1), str.back() == '+' ? true : false);
         } else if (split.size() == 2) {
             try {
-                Options::set_int(split.at(0), std::stoi(split.at(1)));
+                Options::set<size_t>(split.at(0), std::stoi(split.at(1)));
             } catch (...) { throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL, instead have: " + arg); }
         } else {
             throw std::invalid_argument("Can't parse argument " + arg);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
                 cur_expr = cur_expr.cdr();
             }
         }
-        if (Options::get_bool("repl"))
+        if (Options::get<bool>("repl"))
             while (true) {
                 std::cout << std::endl << "> ";
                 vm.loadControl(repl);

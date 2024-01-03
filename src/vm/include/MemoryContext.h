@@ -73,17 +73,17 @@ private:
             tcellnum = _temp_cells.size();
         }
 
-        if ((_cells_num + tcellnum) >= (Options::get_int("cell_limit"))) {
+        if ((_cells_num + tcellnum) >= (Options::get<size_t>("cell_limit"))) {
             // We might need to run GC twice as it has to process the messages;
             Logger::log("MemoryContext", "Running forced gc", Logger::ERROR);
-            for (int i = 0; i < 3 && (_cells_num + tcellnum) >= (Options::get_int("cell_limit")); i++) {
+            for (int i = 0; i < 3 && (_cells_num + tcellnum) >= (Options::get<size_t>("cell_limit")); i++) {
                 request_gc_and_wait();
                 {
                     std::lock_guard tmplg(_new_roots_lock);
                     tcellnum = _temp_cells.size();
                 }
             }
-            if ((_cells_num + tcellnum) >= (Options::get_int("cell_limit"))) {
+            if ((_cells_num + tcellnum) >= (Options::get<size_t>("cell_limit"))) {
                 Logger::log("MemoryContext", "Out of cells", Logger::ERROR);
 
                 throw std::runtime_error("Out of cells");
@@ -96,7 +96,7 @@ private:
             std::lock_guard tmplg(_new_roots_lock);
             Handle ret(cell);
             _temp_cells.emplace_back(cell);
-            if ((_cells_num + _temp_cells.size() + 1) >= (size_t) (Options::get_int("cell_limit") / 2)) { request_gc(); }
+            if ((_cells_num + _temp_cells.size() + 1) >= (size_t) (Options::get<size_t>("cell_limit") / 2)) { request_gc(); }
             return ret;
         }
     }

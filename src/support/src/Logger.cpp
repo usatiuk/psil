@@ -55,7 +55,7 @@ void Logger::reset() {
 }
 int Logger::get_level(const std::string &tag) {
     std::shared_lock l(get()._mutex);
-    int en_level = Options::get_int("default_log_level");
+    int en_level = Options::get<size_t>("default_log_level");
     if (get()._levels.find(tag) != get()._levels.end()) en_level = get()._levels.at(tag);
     return en_level;
 }

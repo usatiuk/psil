@@ -13,10 +13,24 @@
 #include <variant>
 class Options {
 public:
-    static bool get_bool(const std::string &opt);
-    static size_t get_int(const std::string &opt);
-    static void set_bool(const std::string &opt, bool val);
-    static void set_int(const std::string &opt, size_t val);
+    template<typename T>
+    static T get(const std::string &opt) {
+        Options &o = get();
+        std::shared_lock l(o._mutex);
+        if (_defaults.find(opt) == _defaults.end()) throw std::invalid_argument("Unknown option " + opt);
+        if (!std::holds_alternative<T>(_defaults.at(opt))) throw std::invalid_argument("Bad option type " + opt);
+        return std::get<T>(o._current.at(opt));
+    }
+
+    template<typename T>
+    static void set(const std::string &opt, const T &val) {
+        Options &o = get();
+        std::lock_guard l(o._mutex);
+        if (_defaults.find(opt) == _defaults.end()) throw std::invalid_argument("Unknown option " + opt);
+        if (!std::holds_alternative<T>(_defaults.at(opt))) throw std::invalid_argument("Bad option type " + opt);
+        o._current[opt] = val;
+    }
+
     static void reset();
     static Options &get();
 

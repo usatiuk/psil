@@ -29,6 +29,7 @@ namespace Command {
         ADD = 13,
         SUB = 14,
 
+        // Encountered in tests
         READCHAR = 15,
         PUTCHAR = 16,
         PUTNUM = 17,
@@ -61,7 +62,7 @@ namespace Command {
             {25, "EQ"},     {26, "LT"},   {27, "GT"},    {28, "NILC"}, {29, "MULT"}, {30, "DIV"}};
 
     static inline Handle make_cmd(CellValType cmd) {
-        if (Options::get_bool("command_strs")) {
+        if (Options::get<bool>("command_strs")) {
             return Handle(cmd_to_str.at(cmd));
         } else
             return Handle(cmd);
