@@ -69,6 +69,8 @@ struct ConsCell : public Cell {
             } else {
                 _car.load()->print(res);
             }
+        } else {
+            res << "()";
         }
         if (_cdr) {
             if (_cdr.load()->_type == CellType::CONS) {
@@ -100,7 +102,7 @@ struct ConsCell : public Cell {
                 _car.load()->print(res);
             }
         } else {
-            res << "null ";
+            res << "()";
         }
         if (_cdr) {
             if (_cdr.load()->_type == CellType::CONS) {

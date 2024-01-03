@@ -1,0 +1,40 @@
+(define (equal? a b)
+  (if (nil? a) (if (nil? b) 1 0)
+    (if (atom a)
+      (if (atom b) (= a b) 0)
+      (if (atom b) 0 (if (equal? (car a) (car b)) (equal? (cdr a) (cdr b)) 0))
+    )
+  )
+)
+
+(define (empty? l)
+    (equal? l (quote()))
+)
+
+(define (reverse-tree bst)
+  (if (empty? bst)
+      (nil)
+      (cons
+       (car bst)
+       (cons
+        (reverse-tree (car (cdr (cdr bst))))
+        (cons (reverse-tree (car (cdr bst))) (nil))
+       )
+      )
+  )
+)
+
+(reverse-tree (quote()))
+(equal? (reverse-tree (quote())) (nil))
+
+(reverse-tree (quote(1 () ())))
+(equal? (reverse-tree (quote(1 () ()))) (quote(1 () ())))
+
+(reverse-tree (quote(1 (2 () ()) ())))
+(equal? (reverse-tree (quote(1 (2 () ()) ()))) (quote(1 () (2 () ()))))
+
+(reverse-tree (quote(2 (1 () ()) (3 () ()))))
+(equal? (reverse-tree (quote(2 (1 () ()) (3 () ())))) (quote(2 (3 () ()) (1 () ()))))
+
+(reverse-tree (quote(10 (5 (3 () ()) ()) (20 () (25 () ())))))
+(equal? (reverse-tree (quote(10 (5 (3 () ()) ()) (20 () (25 () ()))))) (quote(10 (20 (25 () ()) ()) (5 () (3 () ())))))
