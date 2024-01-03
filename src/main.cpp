@@ -5,7 +5,6 @@
 #include "VM.h"
 
 int main() {
-    MemoryContext mc;
     Handle repl;
     {
         Parser parser;

@@ -6,7 +6,7 @@ TEST(VMTest, BasicHello) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Handle newc(Handle::cons(nullptr, nullptr));
         newc.append(Handle::makeStrCell("NIL"));

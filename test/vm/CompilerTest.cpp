@@ -11,7 +11,7 @@ TEST(CompilerTest, BasicHello) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC 3 EVAL PRINT STOP)");
@@ -26,7 +26,7 @@ TEST(CompilerTest, BasicLet) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (let ((x 1)) x) EVAL PRINT STOP)");
@@ -41,7 +41,7 @@ TEST(CompilerTest, BasicFn) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (let ((plfn (lambda (a b) (+ a b)))) (plfn 2 3)) EVAL PRINT STOP)");
@@ -56,7 +56,7 @@ TEST(CompilerTest, BasicFnIfT) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (let ((plfn (lambda (a) (if a 1 2)))) (plfn 1)) EVAL PRINT STOP)");
@@ -70,7 +70,7 @@ TEST(CompilerTest, BasicFnIfF) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (let ((plfn (lambda (a) (if a 1 2)))) (plfn 0)) EVAL PRINT STOP)");
@@ -84,7 +84,7 @@ TEST(CompilerTest, RecursiveFn) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (letrec ((fib (lambda (n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ))) (fib 10)) EVAL PRINT STOP)");

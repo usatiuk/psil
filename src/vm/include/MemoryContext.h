@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <functional>
 #include <iostream>
 #include <list>
 #include <map>
@@ -14,7 +15,6 @@
 #include <queue>
 #include <set>
 #include <thread>
-#include <functional>
 
 #include "Cell.h"
 #include "Handle.h"
@@ -27,6 +27,8 @@ public:
 
     MemoryContext();
     ~MemoryContext();
+
+    static MemoryContext &get();
 
     template<typename CT, typename... Args>
     Handle create_cell(Args... args) {
@@ -135,7 +137,5 @@ private:
     std::thread _gc_thread;
     std::atomic<bool> _gc_thread_stop = false;
 };
-
-extern std::atomic<MemoryContext *> CURRENT_MC;
 
 #endif//PSIL_MEMORYCONTEXT_H

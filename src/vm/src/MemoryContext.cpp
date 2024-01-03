@@ -10,12 +10,8 @@
 #include <sstream>
 #include <unordered_set>
 
-std::atomic<MemoryContext *> CURRENT_MC = nullptr;
 
 MemoryContext::MemoryContext() {
-    MemoryContext *expected = nullptr;
-    if (!CURRENT_MC.compare_exchange_strong(expected, this)) throw std::runtime_error("MC already exists!");
-
     _gc_thread = std::thread(std::bind(&MemoryContext::gc_thread_entry, this));
 }
 
@@ -29,11 +25,6 @@ MemoryContext::~MemoryContext() {
 
     assert(cell_count() == 0);
 
-    MemoryContext *expected = this;
-    if (!CURRENT_MC.compare_exchange_strong(expected, nullptr)) {
-        std::cerr << "Global MC pointer was overwritten!" << std::endl;
-        std::abort();
-    }
     _gc_thread_stop = true;
     _gc_request_cv.notify_all();
     _gc_thread.join();
@@ -253,4 +244,8 @@ void MemoryContext::gc_thread_entry() {
             _gc_done_cv.notify_all();
         }
     }
+}
+MemoryContext &MemoryContext::get() {
+    static MemoryContext mc;
+    return mc;
 }

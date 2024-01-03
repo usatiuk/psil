@@ -7,7 +7,7 @@ TEST(VMWithParserTest, BasicHello) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC 104 PUTCHAR STOP)");
@@ -22,7 +22,7 @@ TEST(VMWithParserTest, BasicBranch) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr(
@@ -38,7 +38,7 @@ TEST(VMWithParserTest, BasicFunction) {
     std::stringstream ssin;
     std::stringstream ssout;
     {
-        MemoryContext mc;
+
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(NIL LDC 1 CONS LDC 2 CONS LDF (LD (1 . 1) LD (1.2) ADD RET) AP PUTNUM STOP)");
@@ -52,7 +52,7 @@ TEST(VMWithParserTest, BasicFunction) {
 TEST(VMWithParserTest, RecFunction) {
     std::stringstream ssin;
     std::stringstream ssout;
-    MemoryContext mc;
+
     {
         VM vm(ssin, ssout);
         Parser parser;
@@ -61,9 +61,9 @@ TEST(VMWithParserTest, RecFunction) {
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
-    mc.request_gc_and_wait();
-    mc.request_gc_and_wait();
-    EXPECT_EQ(mc.cell_count(), 0);
+    MemoryContext::get().request_gc_and_wait();
+    MemoryContext::get().request_gc_and_wait();
+    EXPECT_EQ(MemoryContext::get().cell_count(), 0);
     ssout.flush();
     EXPECT_EQ(ssout.str(), "6765");
 }
