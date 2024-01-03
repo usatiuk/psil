@@ -5,6 +5,22 @@
 #include <gtest/gtest.h>
 
 #include "MemoryContext.h"
+class Environment : public ::testing::Environment {
+public:
+    ~Environment() override {}
+
+    void SetUp() override {
+        Options::set_int("cell_limit", 60000);
+        Logger::set_level("MemoryContext", Logger::INFO);
+    }
+
+    void TearDown() override {
+        Options::reset();
+        Logger::reset();
+    }
+};
+
+testing::Environment *const env = testing::AddGlobalTestEnvironment(new Environment);
 
 TEST(GCTest, GCTest) {
 
@@ -19,6 +35,7 @@ TEST(GCTest, GCTest) {
     }
     MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
+    MemoryContext::get().request_gc_and_wait();
     EXPECT_EQ(MemoryContext::get().cell_count(), 0);
     {
         Handle c = Handle::cons(nullptr, nullptr);
@@ -29,6 +46,7 @@ TEST(GCTest, GCTest) {
         EXPECT_EQ(c.car().val(), 2);
         EXPECT_EQ(c.cdr().car().val(), 1);
     }
+    MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     EXPECT_EQ(MemoryContext::get().cell_count(), 0);
@@ -43,6 +61,7 @@ TEST(GCTest, GCTestAppend) {
         MemoryContext::get().request_gc();
         EXPECT_EQ(c.car().val(), 1);
     }
+    MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     EXPECT_EQ(MemoryContext::get().cell_count(), 0);
@@ -63,6 +82,7 @@ TEST(GCTest, GCTestPop) {
     }
     MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
+    MemoryContext::get().request_gc_and_wait();
     EXPECT_EQ(MemoryContext::get().cell_count(), 0);
 }
 
@@ -78,6 +98,7 @@ TEST(GCTest, GCTestAppend2) {
         MemoryContext::get().request_gc();
         EXPECT_EQ(i, c.pop().val());
     }
+    MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     EXPECT_EQ(MemoryContext::get().cell_count(), 0);
@@ -96,6 +117,7 @@ TEST(GCTest, GCTestAppend3) {
         EXPECT_EQ(n.car().val(), 2);
         EXPECT_EQ(c.car().val(), 1);
     }
+    MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     EXPECT_EQ(MemoryContext::get().cell_count(), 0);

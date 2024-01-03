@@ -3,6 +3,24 @@
 #include "Parser.h"
 #include "VM.h"
 
+class Environment : public ::testing::Environment {
+public:
+    ~Environment() override {}
+
+    void SetUp() override {
+        Options::set_int("cell_limit", 2000);
+        Logger::set_level("MemoryContext", Logger::INFO);
+    }
+
+    void TearDown() override {
+        Options::reset();
+        Logger::reset();
+    }
+};
+
+testing::Environment *const env = testing::AddGlobalTestEnvironment(new Environment);
+
+
 TEST(VMWithParserTest, BasicHello) {
     std::stringstream ssin;
     std::stringstream ssout;
@@ -61,6 +79,7 @@ TEST(VMWithParserTest, RecFunction) {
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
+    MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     MemoryContext::get().request_gc_and_wait();
     EXPECT_EQ(MemoryContext::get().cell_count(), 0);

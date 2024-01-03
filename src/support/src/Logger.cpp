@@ -9,8 +9,6 @@
 
 #include "Options.h"
 Logger &Logger::get() {
-    // Ensure proper destruction order for tests
-    Options::get();
     static Logger logger;
     return logger;
 }

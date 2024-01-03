@@ -2,6 +2,22 @@
 
 #include "Command.h"
 #include "VM.h"
+class Environment : public ::testing::Environment {
+public:
+    ~Environment() override {}
+
+    void SetUp() override {
+        Options::set_int("cell_limit", 1000);
+        Logger::set_level("MemoryContext", Logger::INFO);
+    }
+
+    void TearDown() override {
+        Options::reset();
+        Logger::reset();
+    }
+};
+
+testing::Environment *const env = testing::AddGlobalTestEnvironment(new Environment);
 
 using namespace Command;
 TEST(VMTest, BasicHello) {
