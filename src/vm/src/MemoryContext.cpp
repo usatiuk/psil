@@ -20,6 +20,15 @@ MemoryContext::MemoryContext() {
 }
 
 MemoryContext::~MemoryContext() {
+    // Three times because the first one might not start it as it's been running already
+    // second one as it might skip something because something has been dirtied
+    // and the third one everything should be cleaned
+    request_gc_and_wait();
+    request_gc_and_wait();
+    request_gc_and_wait();
+
+    assert(cell_count() == 0);
+
     MemoryContext *expected = this;
     if (!CURRENT_MC.compare_exchange_strong(expected, nullptr)) {
         std::cerr << "Global MC pointer was overwritten!" << std::endl;
