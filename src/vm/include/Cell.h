@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstdint>
 #include <ostream>
+#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -53,21 +54,59 @@ struct ConsCell : public Cell {
     std::atomic<Cell *> _car = nullptr;
     std::atomic<Cell *> _cdr = nullptr;
 
-    void print(std::ostream &out) override {
+    void print_cons(std::ostream &out, std::set<Cell *> &seen) {
         std::stringstream res;
         if (_car) {
             if (_car.load()->_type == CellType::CONS) {
-                res << "(";
-                _car.load()->print(res);
-                res << ")";
+                if (seen.find(_car) == seen.end()) {
+                    res << "(";
+                    seen.emplace(_car.load());
+                    dynamic_cast<ConsCell &>(*_car.load()).print_cons(res, seen);
+                    res << ")";
+                } else {
+                    res << "(recursive)";
+                }
             } else {
                 _car.load()->print(res);
             }
         }
         if (_cdr) {
             if (_cdr.load()->_type == CellType::CONS) {
-                res << " ";
+                if (seen.find(_cdr) == seen.end()) {
+                    res << " ";
+                    seen.emplace(_cdr.load());
+                    dynamic_cast<ConsCell &>(*_cdr.load()).print_cons(res, seen);
+                } else {
+                    res << " recursive";
+                }
+            } else {
+                res << ".";
                 _cdr.load()->print(res);
+            }
+        }
+        out << res.str();
+    }
+
+    void print(std::ostream &out) override {
+        std::stringstream res;
+        std::set<Cell *> seen;
+        if (_car) {
+            if (_car.load()->_type == CellType::CONS) {
+                res << "(";
+                seen.emplace(_car.load());
+                dynamic_cast<ConsCell &>(*_car.load()).print_cons(res, seen);
+                res << ")";
+            } else {
+                _car.load()->print(res);
+            }
+        } else {
+            res << "null ";
+        }
+        if (_cdr) {
+            if (_cdr.load()->_type == CellType::CONS) {
+                res << " ";
+                seen.emplace(_cdr.load());
+                dynamic_cast<ConsCell &>(*_cdr.load()).print_cons(res, seen);
             } else {
                 res << ".";
                 _cdr.load()->print(res);

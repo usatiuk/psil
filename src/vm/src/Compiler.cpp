@@ -4,25 +4,34 @@
 
 #include "Compiler.h"
 
-#include "Command.h"
 
 #include <functional>
+#include <stack>
 #include <string>
+
+#include "Command.h"
+#include "Logger.h"
+
 
 using namespace Command;
 
 
-static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD},   {"-", SUB}, {"cons", CONS}, {"car", CAR},
-                                                               {"cdr", CDR}, {"=", EQ},  {">", GT},      {"<", LT}};
+static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD}, {"-", SUB}, {"cons", CONS}, {"car", CAR}, {"cdr", CDR},
+                                                               {"=", EQ},  {">", GT},  {"<", LT},      {"nil", NIL}};
 
 Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
 
     std::function<Handle(Handle)> compileArgsRaw = [&](Handle args) {
         Handle out;
+        std::stack<Handle> rev;
         while (!args.null()) {
-            out.splice(compile(args.car(), fake_env));
+            rev.push(args.car());
             args = args.cdr();
+        }
+        while (!rev.empty()) {
+            out.splice(compile(rev.top(), fake_env));
+            rev.pop();
         }
         return out;
     };
@@ -30,10 +39,19 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
     std::function<Handle(Handle, Handle)> compileArgsList = [&](Handle args, Handle env) {
         Handle out;
         out.append(make_cmd(NIL));
+        std::stack<Handle> rev;
         while (!args.null()) {
-            out.splice(compile(args.car(), env));
-            out.append(make_cmd(CONS));
+            rev.push(args.car());
             args = args.cdr();
+        }
+        while (!args.null()) {
+            rev.push(args.car());
+            args = args.cdr();
+        }
+        while (!rev.empty()) {
+            out.splice(compile(rev.top(), env));
+            out.append(make_cmd(CONS));
+            rev.pop();
         }
         return out;
     };
@@ -60,7 +78,10 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
         Handle car = expr.car();
         Handle cdr = expr.cdr();
         if (car.atom()) {
-            if (builtins.find(car.strval()) != builtins.end()) {
+            if (car.strval() == "quote") {
+                out.append(make_cmd(LDC));
+                out.splice(cdr);
+            } else if (builtins.find(car.strval()) != builtins.end()) {
                 out.splice(compileArgsRaw(cdr));
                 out.append(make_cmd(builtins.at(car.strval())));
             } else if (car.strval() == "read") {
@@ -78,8 +99,6 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
                 out.append(make_cmd(LDG));
                 out.append(compile(cdr.cdr().car(), Handle::cons(cdr.car().cdr(), fake_env), make_cmd(RET)));
             } else if (car.strval() == "let" || car.strval() == "letrec") {
-                std::vector<std::pair<Handle, Handle>> argBody;
-
                 Handle definitions = cdr.car();
 
                 Handle argNames;
@@ -88,7 +107,6 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
                 Handle body = cdr.cdr().car();
 
                 while (!definitions.null()) {
-                    argBody.emplace_back(definitions.car().car(), definitions.car().cdr().car());
                     argNames.append(definitions.car().car());
                     argBodies.append(definitions.car().cdr().car());
                     definitions = definitions.cdr();

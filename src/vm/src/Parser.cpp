@@ -29,6 +29,10 @@ Handle Parser::parseExpr() {
 
                     return out;
                 }
+                if (_tokenizer.peek() == ")") {
+                    token = _tokenizer.peek();
+                    continue;
+                }
                 out.append(parseExpr());
                 token = _tokenizer.peek();
             }
@@ -37,7 +41,7 @@ Handle Parser::parseExpr() {
         } else {
             token = _tokenizer.getNext();
             if (token.find_first_not_of("0123456789") == std::string::npos ||
-                (token.length() > 1 && token.at(0) == '0' && token.find_first_not_of("0123456789", 1) == std::string::npos)) {
+                (token.length() > 1 && token.at(0) == '-' && token.find_first_not_of("0123456789", 1) == std::string::npos)) {
                 CellValType val = std::stoi(token);
                 return Handle::makeNumCell(val);
             } else {

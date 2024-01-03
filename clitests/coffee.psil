@@ -1,0 +1,21 @@
+(define (getmax a b)
+  (if (> a b) a b)
+)
+
+(define (coffee-shop-impl times last cur max)
+  (if (= times (nil))
+      (getmax cur max)
+       (if (= last (car times))
+           (coffee-shop-impl (cdr times) last (+ cur 1) max)
+           (coffee-shop-impl (cdr times) (car times) 1 (getmax cur max))
+           )
+  )
+)
+
+(define (coffee-shop times)
+  (coffee-shop-impl times (nil) 0 0)
+)
+
+(coffee-shop (nil))
+(coffee-shop (quote( (8 0) (8 10) (8 10) (8 45) )))
+(coffee-shop (quote( (8 12) (10 11) (10 11) (15 15) (15 15) (15 15) (22 22) (22 22) (22 59) )))

@@ -23,6 +23,19 @@ void VM::step() {
     Handle poppedH = _c.pop();
     // as to not complicate parser for tests...
     CellValType poppedCmd = poppedH.type() == CellType::STRATOM ? str_to_cmd.at(poppedH.strval()) : poppedH.val();
+
+
+    Logger::log(
+            "VM",
+            [&](std::ostream &out) {
+                out << "Executing " << cmd_to_str.at(poppedCmd) << "\n";
+                if (!_s.null()) out << "s:" << _s << "\n";
+                if (!_e.null()) out << "e:" << _e << "\n";
+                if (!_c.null()) out << "c:" << _c << "\n";
+                if (!_d.null()) out << "d:" << _d << "\n";
+            },
+            Logger::TRACE);
+
     if (poppedCmd == NIL) {
         _s.push(nullptr);
     } else if (poppedCmd == LDC) {
@@ -115,17 +128,17 @@ void VM::step() {
     } else if (poppedCmd == SUB) {
         CellValType a1 = _s.pop().val();
         CellValType a2 = _s.pop().val();
-        _s.push(a2 - a1);
+        _s.push(a1 - a2);
     } else if (poppedCmd == EQ) {
         _s.push(_s.pop() == _s.pop() ? 1 : 0);
     } else if (poppedCmd == LT) {
         CellValType a1 = _s.pop().val();
         CellValType a2 = _s.pop().val();
-        _s.push(a2 < a1 ? 1 : 0);
+        _s.push(a1 < a2 ? 1 : 0);
     } else if (poppedCmd == GT) {
         CellValType a1 = _s.pop().val();
         CellValType a2 = _s.pop().val();
-        _s.push(a2 > a1 ? 1 : 0);
+        _s.push(a1 > a2 ? 1 : 0);
     } else if (poppedCmd == CAR) {
         _s.push(_s.pop().car());
     } else if (poppedCmd == CDR) {
@@ -159,7 +172,14 @@ void VM::step() {
     } else if (poppedCmd == LDG) {
         _globals_vals.append(Handle::cons(_c.pop(), _e));
     } else if (poppedCmd == PRINT) {
-        if (!_s.null()) _outstream << _s.pop() << std::endl;
+        if (!_s.null()) {
+            Handle val = _s.pop();
+            bool cons = !val.atom();
+            if (cons) _outstream << "(";
+            _outstream << val;
+            if (cons) _outstream << ")";
+            _outstream << std::endl;
+        }
     } else if (poppedCmd == READ) {
         std::string read;
         std::getline(_instream, read);
@@ -169,4 +189,16 @@ void VM::step() {
     } else {
         assert(false);
     }
+
+
+    Logger::log(
+            "VM",
+            [&](std::ostream &out) {
+                out << "Executed " << cmd_to_str.at(poppedCmd) << "\n";
+                if (!_s.null()) out << "s:" << _s << "\n";
+                if (!_e.null()) out << "e:" << _e << "\n";
+                if (!_c.null()) out << "c:" << _c << "\n";
+                if (!_d.null()) out << "d:" << _d << "\n";
+            },
+            Logger::TRACE);
 }

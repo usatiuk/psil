@@ -20,6 +20,7 @@ for FILE in *.psil; do
           continue
       fi
 
+       echo "$FILE OK"
       rm $FILE.res
 done
 

@@ -30,14 +30,15 @@ public:
             } else if (_target->_type == CellType::STRATOM) {
                 return dynamic_cast<StrAtomCell &>(*_target)._val == dynamic_cast<StrAtomCell &>(*rhs._target)._val;
             }
-        }
+        } else if (null() && rhs.null())
+            return true;
         return false;
     }
 
     static Handle cons(const Handle &car, const Handle &cdr);
 
-    Handle car() { return dynamic_cast<ConsCell &>(*_target)._car.load(); }
-    Handle cdr() { return dynamic_cast<ConsCell &>(*_target)._cdr.load(); }
+    Handle car() const { return dynamic_cast<ConsCell &>(*_target)._car.load(); }
+    Handle cdr() const { return dynamic_cast<ConsCell &>(*_target)._cdr.load(); }
     CellValType val() { return dynamic_cast<NumAtomCell &>(*_target)._val; }
     std::string_view strval() { return dynamic_cast<StrAtomCell &>(*_target)._val; }
 
@@ -48,7 +49,7 @@ public:
 
     bool atom() const { return type() != CellType::CONS; }
 
-    bool null() {
+    bool null() const {
         if (!_target) return true;
         if (type() == CellType::CONS && car() == nullptr && cdr() == nullptr) return true;
         return false;

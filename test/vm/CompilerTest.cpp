@@ -37,7 +37,7 @@ TEST(CompilerTest, BasicHello) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "3");
+    EXPECT_EQ(ssout.str(), "3\n");
 }
 
 TEST(CompilerTest, BasicLet) {
@@ -52,7 +52,7 @@ TEST(CompilerTest, BasicLet) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1");
+    EXPECT_EQ(ssout.str(), "1\n");
 }
 
 TEST(CompilerTest, BasicFn) {
@@ -67,8 +67,47 @@ TEST(CompilerTest, BasicFn) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "5");
+    EXPECT_EQ(ssout.str(), "5\n");
 }
+
+TEST(CompilerTest, BasicFn2) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b)))) (plfn 2 3)) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "-1\n");
+}
+
+TEST(CompilerTest, MultiLet) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn 2 3)) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn2 2 3)) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "-1\n1\n");
+}
+
 
 TEST(CompilerTest, BasicFnIfT) {
     std::stringstream ssin;
@@ -82,7 +121,7 @@ TEST(CompilerTest, BasicFnIfT) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1");
+    EXPECT_EQ(ssout.str(), "1\n");
 }
 TEST(CompilerTest, BasicFnIfF) {
     std::stringstream ssin;
@@ -96,7 +135,7 @@ TEST(CompilerTest, BasicFnIfF) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "2");
+    EXPECT_EQ(ssout.str(), "2\n");
 }
 TEST(CompilerTest, RecursiveFn) {
     std::stringstream ssin;
@@ -111,7 +150,7 @@ TEST(CompilerTest, RecursiveFn) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "55");
+    EXPECT_EQ(ssout.str(), "55\n");
 }
 
 TEST(CompilerTest, GlobalDefine) {
@@ -126,7 +165,7 @@ TEST(CompilerTest, GlobalDefine) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1");
+    EXPECT_EQ(ssout.str(), "1\n");
 }
 
 
@@ -142,7 +181,61 @@ TEST(CompilerTest, GlobalDefineFn) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "5");
+    EXPECT_EQ(ssout.str(), "5\n");
+}
+
+TEST(CompilerTest, GlobalDefineFnQuote) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (define (one) (quote (1 2))) EVAL LDC (one) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "(1 2)\n");
+}
+
+TEST(CompilerTest, GlobalDefineFnCar) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr(
+                "(LDC (define (carr l) (car l)) EVAL LDC (carr (quote (1 2))) EVAL PRINT LDC (carr (cdr (quote (1 2)))) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "1\n2\n");
+}
+
+TEST(CompilerTest, GlobalDefineFnEq) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (define (eqtest l) (= l ())) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest (nil)) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (define (eqtest l) (= l (nil))) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest (nil)) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "1\n1\n1\n1\n");
 }
 
 TEST(CompilerTest, GlobalDefineFnMulti) {
@@ -157,8 +250,24 @@ TEST(CompilerTest, GlobalDefineFnMulti) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "6");
+    EXPECT_EQ(ssout.str(), "6\n");
 }
+
+TEST(CompilerTest, GlobalDefineFnMultiTwo) {
+    std::stringstream ssin;
+    std::stringstream ssout;
+    {
+
+        VM vm(ssin, ssout);
+        Parser parser;
+        parser.loadStr("(LDC (define (one x y) (- x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) EVAL PRINT STOP)");
+        vm.loadControl(parser.parseExpr());
+        vm.run();
+    }
+    ssout.flush();
+    EXPECT_EQ(ssout.str(), "0\n");
+}
+
 
 TEST(CompilerTest, GlobalDefineFnRec) {
     std::stringstream ssin;
@@ -176,5 +285,5 @@ TEST(CompilerTest, GlobalDefineFnRec) {
     Options::set_bool("command_strs", true);
     Logger::set_level("MemoryContext", Options::get_int("default_log_level"));
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "6765");
+    EXPECT_EQ(ssout.str(), "6765\n");
 }
