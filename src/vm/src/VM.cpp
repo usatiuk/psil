@@ -242,7 +242,7 @@ void VM::step() {
         std::getline(_instream, read);
         _s.push(Parser::parse_str(read));
     } else {
-        assert(false);
+        throw std::invalid_argument("Unexpected end of program");
     }
 
 

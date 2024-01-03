@@ -64,7 +64,10 @@ std::string Parser::Tokenizer::getNext() {
     return ret;
 }
 
-std::string_view Parser::Tokenizer::peek() const { return _tokens.front(); }
+std::string_view Parser::Tokenizer::peek() const {
+    if (_tokens.empty()) throw std::invalid_argument("Unexpected end of input (or maybe missing \")\"?");
+    return _tokens.front();
+}
 
 void Parser::Tokenizer::load(std::string_view input) {
     std::string_view::size_type curpos = input.find_first_not_of(std::string{' ', '\n', '\r'});

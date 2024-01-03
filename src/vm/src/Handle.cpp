@@ -68,6 +68,7 @@ Handle Handle::makeNumCell(int64_t val) { return MemoryContext::get().create_cel
 Handle Handle::makeStrCell(std::string val) { return MemoryContext::get().create_cell<StrAtomCell>(std::move(val)); }
 
 void Handle::setcar(const Handle &car) {
+    if (_target->_type != CellType::CONS) throw std::invalid_argument("Expected cons cell, got something else");
     MemoryContext::get().run_dirty<void>([&](std::function<void(Cell *)> lost) -> void {
         lost(dynamic_cast<ConsCell &>(*_target)._car);
         dynamic_cast<ConsCell &>(*_target)._car = car.get();
@@ -75,6 +76,7 @@ void Handle::setcar(const Handle &car) {
 }
 
 void Handle::setcdr(const Handle &cdr) {
+    if (_target->_type != CellType::CONS) throw std::invalid_argument("Expected cons cell, got something else");
     MemoryContext::get().run_dirty<void>([&](std::function<void(Cell *)> lost) -> void {
         lost(dynamic_cast<ConsCell &>(*_target)._cdr);
         dynamic_cast<ConsCell &>(*_target)._cdr = cdr.get();

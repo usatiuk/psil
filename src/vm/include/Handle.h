@@ -44,23 +44,33 @@ public:
 
     const Handle car() const {
         if (!_target) return Handle(nullptr);
+        if (_target->_type != CellType::CONS) throw std::invalid_argument("Expected cons cell, got something else");
         return dynamic_cast<ConsCell &>(*_target)._car.load();
     }
     const Handle cdr() const {
         if (!_target) return Handle(nullptr);
+        if (_target->_type != CellType::CONS) throw std::invalid_argument("Expected cons cell, got something else");
         return dynamic_cast<ConsCell &>(*_target)._cdr.load();
     }
     Handle car() {
         if (!_target) return Handle(nullptr);
+        if (_target->_type != CellType::CONS) throw std::invalid_argument("Expected cons cell, got something else");
         return dynamic_cast<ConsCell &>(*_target)._car.load();
     }
     Handle cdr() {
         if (!_target) return Handle(nullptr);
+        if (_target->_type != CellType::CONS) throw std::invalid_argument("Expected cons cell, got something else");
         return dynamic_cast<ConsCell &>(*_target)._cdr.load();
     }
 
-    CellValType val() const { return dynamic_cast<NumAtomCell &>(*_target)._val; }
-    std::string_view strval() const { return dynamic_cast<StrAtomCell &>(*_target)._val; }
+    CellValType val() const {
+        if (_target->_type != CellType::NUMATOM) throw std::invalid_argument("Expected number cell, got something else");
+        return dynamic_cast<NumAtomCell &>(*_target)._val;
+    }
+    std::string_view strval() const {
+        if (_target->_type != CellType::STRATOM) throw std::invalid_argument("Expected string cell, got something else");
+        return dynamic_cast<StrAtomCell &>(*_target)._val;
+    }
 
     CellType type() const {
         if (!_target) return CellType::CONS;
