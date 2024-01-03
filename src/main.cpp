@@ -21,7 +21,9 @@ void parse_options(int argc, char *argv[]) {
             continue;
         }
 
-        if (arg.length() < 2 || arg.substr(0, 2) != "--") { throw std::invalid_argument("Can't parse argument " + arg); }
+        if (arg.length() < 2 || arg.substr(0, 2) != "--") {
+            throw std::invalid_argument("Can't parse argument " + arg);
+        }
         std::string rest = arg.substr(2);
 
         std::vector<std::string> split;

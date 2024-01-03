@@ -4,6 +4,8 @@
 
 #include "Handle.h"
 
+#include <stdexcept>
+
 #include "MemoryContext.h"
 
 Handle::Handle(Cell *target) : _target(target) {

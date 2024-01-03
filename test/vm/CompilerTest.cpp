@@ -93,7 +93,8 @@ TEST(CompilerTest, MultiLet) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn 2 3)) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn 2 3)) EVAL "
+                       "PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -101,7 +102,8 @@ TEST(CompilerTest, MultiLet) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn2 2 3)) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn2 2 3)) EVAL "
+                       "PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -145,8 +147,8 @@ TEST(CompilerTest, RecursiveFn) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr(
-                "(LDC (letrec ((fib (lambda (n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ))) (fib 10)) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (letrec ((fib (lambda (n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ))) "
+                       "(fib 10)) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -207,8 +209,8 @@ TEST(CompilerTest, GlobalDefineFnCar) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr(
-                "(LDC (define (carr l) (car l)) EVAL LDC (carr (quote (1 2))) EVAL PRINT LDC (carr (cdr (quote (1 2)))) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (define (carr l) (car l)) EVAL LDC (carr (quote (1 2))) EVAL PRINT LDC (carr (cdr (quote "
+                       "(1 2)))) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -223,7 +225,8 @@ TEST(CompilerTest, GlobalDefineFnEq) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("(LDC (define (eqtest l) (= l ())) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest (nil)) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (define (eqtest l) (= l ())) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest (nil)) "
+                       "EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -231,7 +234,8 @@ TEST(CompilerTest, GlobalDefineFnEq) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("(LDC (define (eqtest l) (= l (nil))) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest (nil)) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (define (eqtest l) (= l (nil))) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest "
+                       "(nil)) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -246,7 +250,8 @@ TEST(CompilerTest, GlobalDefineFnMulti) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("(LDC (define (one x y) (+ x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (define (one x y) (+ x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) "
+                       "EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -261,7 +266,8 @@ TEST(CompilerTest, GlobalDefineFnMultiTwo) {
 
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr("(LDC (define (one x y) (- x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (define (one x y) (- x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) "
+                       "EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -278,8 +284,8 @@ TEST(CompilerTest, GlobalDefineFnRec) {
     {
         VM vm(ssin, ssout);
         Parser parser;
-        parser.loadStr(
-                "(LDC (define (fib n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ) EVAL LDC (fib 20) EVAL PRINT STOP)");
+        parser.loadStr("(LDC (define (fib n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ) EVAL LDC (fib "
+                       "20) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }

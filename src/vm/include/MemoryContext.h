@@ -95,7 +95,9 @@ private:
             std::lock_guard tmplg(_new_roots_lock);
             Handle ret(cell);
             _temp_cells.emplace_back(cell);
-            if ((_cells_num + _temp_cells.size() + 1) >= (size_t) (Options::get<size_t>("cell_limit") / 2)) { request_gc(); }
+            if ((_cells_num + _temp_cells.size() + 1) >= (size_t) (Options::get<size_t>("cell_limit") / 2)) {
+                request_gc();
+            }
             return ret;
         }
     }

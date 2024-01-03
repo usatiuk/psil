@@ -17,9 +17,9 @@
 using namespace Command;
 
 
-static std::unordered_map<std::string_view, CommandE> builtins{{"+", ADD},     {"-", SUB},  {"cons", CONS}, {"car", CAR}, {"cdr", CDR},
-                                                               {"=", EQ},      {">", GT},   {"<", LT},      {"nil", NIL}, {"nil?", NILC},
-                                                               {"atom", ATOM}, {"*", MULT}, {"/", DIV}};
+static std::unordered_map<std::string_view, CommandE> builtins{
+        {"+", ADD}, {"-", SUB},   {"cons", CONS}, {"car", CAR},   {"cdr", CDR}, {"=", EQ}, {">", GT},
+        {"<", LT},  {"nil", NIL}, {"nil?", NILC}, {"atom", ATOM}, {"*", MULT},  {"/", DIV}};
 
 Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
@@ -128,7 +128,8 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
 
                 out.append(make_cmd(LD));
                 Handle idx = findIndex(car, fake_env);
-                if (idx.null()) throw std::invalid_argument("Could not find function to apply: " + std::string(car.strval()));
+                if (idx.null())
+                    throw std::invalid_argument("Could not find function to apply: " + std::string(car.strval()));
                 out.append(idx);
                 out.append(make_cmd(AP));
             }

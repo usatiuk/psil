@@ -20,7 +20,10 @@ void Logger::log(const std::string &tag, const std::string &what, int level) {
         auto now = std::chrono::high_resolution_clock::now();
         std::stringstream out;
         out << std::setprecision(3) << std::fixed << "["
-            << static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(now - get()._start_time).count()) / 1000.0 << "s]"
+            << static_cast<double>(
+                       std::chrono::duration_cast<std::chrono::milliseconds>(now - get()._start_time).count()) /
+                        1000.0
+            << "s]"
             << "[" << tag << "][" << get()._level_names.at(level) << "] " << what << '\n';
 
         if (level == 1) get()._out_err.get() << out.str();

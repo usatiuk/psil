@@ -6,6 +6,7 @@
 
 #include <ranges>
 #include <stack>
+#include <stdexcept>
 
 #include "MemoryContext.h"
 #include "VM.h"
@@ -46,7 +47,8 @@ Handle Parser::parseExpr() {
         } else {
             token = _tokenizer.getNext();
             if (token.find_first_not_of("0123456789") == std::string::npos ||
-                (token.length() > 1 && token.at(0) == '-' && token.find_first_not_of("0123456789", 1) == std::string::npos)) {
+                (token.length() > 1 && token.at(0) == '-' &&
+                 token.find_first_not_of("0123456789", 1) == std::string::npos)) {
                 CellValType val = std::stoi(token);
                 return Handle::makeNumCell(val);
             } else {

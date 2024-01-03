@@ -5,6 +5,8 @@
 #ifndef PSIL_HANDLE_H
 #define PSIL_HANDLE_H
 
+#include <stdexcept>
+
 #include "Cell.h"
 
 class MemoryContext;
@@ -64,11 +66,13 @@ public:
     }
 
     CellValType val() const {
-        if (_target->_type != CellType::NUMATOM) throw std::invalid_argument("Expected number cell, got something else");
+        if (_target->_type != CellType::NUMATOM)
+            throw std::invalid_argument("Expected number cell, got something else");
         return dynamic_cast<NumAtomCell &>(*_target)._val;
     }
     std::string_view strval() const {
-        if (_target->_type != CellType::STRATOM) throw std::invalid_argument("Expected string cell, got something else");
+        if (_target->_type != CellType::STRATOM)
+            throw std::invalid_argument("Expected string cell, got something else");
         return dynamic_cast<StrAtomCell &>(*_target)._val;
     }
 
