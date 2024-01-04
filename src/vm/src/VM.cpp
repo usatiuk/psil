@@ -35,7 +35,7 @@ void VM::step() {
                 if (!_d.null()) out << "d:" << _d << "\n";
             },
             Logger::TRACE);
-    
+
     switch (poppedCmd) {
         case NIL: {
             _s.push(nullptr);
@@ -300,6 +300,7 @@ void VM::step() {
             std::string read;
             std::getline(_instream, read);
             _s.push(Parser::parse_str(read));
+            break;
         }
         default:
             throw std::invalid_argument("Unknown command: " + std::to_string(poppedCmd));

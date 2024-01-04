@@ -40,6 +40,7 @@ private:
     const static inline std::unordered_map<std::string, std::variant<size_t, bool>> _defaults{{"cell_limit", 50000U},
                                                                                               {"command_strs", false},
                                                                                               {"default_log_level", 1U},
+                                                                                              {"gc_threshold", 50U},
                                                                                               {"repl", true}};
 
     std::unordered_map<std::string, std::variant<size_t, bool>> _current = _defaults;
