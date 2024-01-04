@@ -38,7 +38,7 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
         return out;
     };
 
-    std::function<Handle(Handle, Handle)> compileArgsList = [&](Handle args, Handle env) {
+    std::function<Handle(Handle, Handle)> compileArgsList = [&](Handle args, const Handle &env) {
         Handle out;
         out.append(make_cmd(NIL));
         std::stack<Handle> rev;

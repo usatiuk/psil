@@ -8,7 +8,7 @@ public:
     ~Environment() override {}
 
     void SetUp() override {
-        Options::set<size_t>("cell_limit", 2000);
+        Options::set<size_t>("cell_limit", 5000);
         Logger::set_level("Compiler", Logger::DEBUG);
     }
 

@@ -13,6 +13,7 @@ public:
     ~Environment() override {}
 
     void SetUp() override {
+        Options::set<size_t>("cell_limit", 50000);
         Options::set<bool>("command_strs", true);
         Logger::set_level("VM", Logger::DEBUG);
         Logger::set_level("Compiler", Logger::DEBUG);
