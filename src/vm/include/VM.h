@@ -26,6 +26,7 @@ public:
 
     void loadStack(const Handle &h) { _s = h; }
 
+    bool is_quit() const { return _quit; }
     void step();
 
 private:
@@ -39,6 +40,7 @@ private:
     Handle _c = Handle::cons(nullptr, nullptr);
     Handle _d = Handle::cons(nullptr, nullptr);
     bool _stop = false;
+    bool _quit = false;
 
     std::istream &_instream;
     std::ostream &_outstream;

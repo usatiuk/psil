@@ -18,8 +18,9 @@ using namespace Command;
 
 
 static std::unordered_map<std::string_view, CommandE> builtins{
-        {"+", ADD}, {"-", SUB},   {"cons", CONS}, {"car", CAR},   {"cdr", CDR}, {"=", EQ}, {">", GT},
-        {"<", LT},  {"nil", NIL}, {"nil?", NILC}, {"atom", ATOM}, {"*", MULT},  {"/", DIV}};
+        {"+", ADD}, {"-", SUB},     {"cons", CONS}, {"car", CAR},     {"cdr", CDR},   {"=", EQ},
+        {">", GT},  {"<", LT},      {"nil", NIL},   {"nil?", NILC},   {"atom", ATOM}, {"*", MULT},
+        {"/", DIV}, {"read", READ}, {"eval", EVAL}, {"print", PRINT}, {"quit", QUIT}};
 
 Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
@@ -82,8 +83,6 @@ Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffi
             } else if (builtins.find(car.strval()) != builtins.end()) {
                 out.splice(compileArgsRaw(cdr));
                 out.append(make_cmd(builtins.at(car.strval())));
-            } else if (car.strval() == "read") {
-                out.append(make_cmd(READ));
             } else if (car.strval() == "lambda") {
                 out.append(make_cmd(LDF));
                 out.append(compile(cdr.cdr().car(), Handle::cons(cdr.car(), fake_env), make_cmd(RET)));

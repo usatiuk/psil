@@ -31,7 +31,7 @@ PSIL="../build/src/psil" clitests/testall.sh
 
 # How to use
 
-You can just run the executable and you'll be in REPL mode (ctrl-c to exit should work),
+You can just run the executable and you'll be in REPL mode (ctrl-c to exit should work, or `(quit)`),
 or specify an input file like `-f <file>`, the effect is the same as if you
 had put it there yourself.
 
@@ -91,10 +91,10 @@ build/src/psil -f clitests/decorate.psil --repl- --command_strs+ --default_log_l
 
 # Some notes on the implementation
 
-The implementation is rather straightforward, based mostly on the compiler from "THE ARCHITECTURE OF SYMBOLIC
-COMPUTERS", with little modification and some additions. Notably, the let/letrec is more lisp-like, using racket-like
+The implementation is rather straightforward, based mostly on the compiler from "The Architecture of Symbolic
+Computers", with little modification and some additions. Notably, the let/letrec is more lisp-like, using racket-like
 name-value pairs instead of them being in separate lists like in the book. Also, there's support for top-level functions
-using `define`, and a simple concurrent garbage collector.
+using `define`, quoting using `(quote value)`, and a simple concurrent garbage collector.
 
 There are three basic value types which is a string atom, number atom, and a cons cell.
 

@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (Options::get<bool>("repl"))
-            while (true) {
+            while (true && !vm.is_quit()) {
                 std::cout << "> ";
                 vm.loadControl(repl);
                 vm.run();

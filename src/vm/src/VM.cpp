@@ -194,6 +194,11 @@ void VM::step() {
             _stop = true;
             break;
         }
+        case QUIT: {
+            _stop = true;
+            _quit = true;
+            break;
+        }
         case ADD: {
             _s.push(_s.pop().val() + _s.pop().val());
             break;
