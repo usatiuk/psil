@@ -11,7 +11,8 @@ cmake -B build -DCMAKE_BUILD_TYPE=Debug -DSANITIZE=YES
 cmake --build build  --parallel $(nproc)
 ```
 
-should be enough (you can also change the build type for Release and disable sanitize in case it's too slow)
+should be enough (you can also change the build type for Release and disable sanitize in case it's too slow, also in
+case of problems you can look at the `.gitlab-ci.yml`)
 
 Pro-tip: all these snippets can be conveniently run from an IDE if it supports it (at least clion does)
 
@@ -74,19 +75,19 @@ instruction and the machine state before/after
 See the GC in action:
 
 ```shell
-build/src/psil -f clitests/fib.psil --repl- --log:Compiler:3 --command_strs+ --cell_limit:10000 --gc_threshold:10 --log:MemoryContext:2
+build/src/psil -f clitests/fib.test.psil --repl- --log:Compiler:3 --command_strs+ --cell_limit:10000 --gc_threshold:10 --log:MemoryContext:2
 ```
 
 See a tree of function applications:
 
 ```shell
-build/src/psil -f clitests/coffee.psil --repl- --log:Compiler:3 --command_strs+ --log:VM:3
+build/src/psil -f clitests/coffee.test.psil --repl- --log:Compiler:3 --command_strs+ --log:VM:3
 ```
 
 Super debug mode:
 
 ```shell
-build/src/psil -f clitests/decorate.psil --repl- --command_strs+ --default_log_level:4 --log:MemoryContext:3
+build/src/psil -f clitests/decorate.test.psil --repl- --command_strs+ --default_log_level:4 --log:MemoryContext:3
 ```
 
 # Some notes on the implementation
@@ -98,7 +99,8 @@ using `define`, quoting using `(quote value)`, and a simple concurrent garbage c
 
 There are three basic value types which is a string atom, number atom, and a cons cell.
 
-String atoms are basically used only internally, and you can't do much with them other than printing them. With number
+String atoms are basically used only internally, and you can't do much with them other than printing and comparing them.
+With number
 atoms you can do all the usual arithmetic, and they also serve as bools - any value greater than 0 is considered true
 for the purposes of `if`. And of course, all the usual stuff with cons cells - `car`, `cdr`, `cons`...
 

@@ -1,0 +1,9 @@
+(+ 2 3)
+(if (= testin (read)) ok bad)
+testin
+(eval (read))
+(+ 4 5)
+(define (equal a b)(if (nil? a) (if (nil? b) 1 0)(if (atom a)(if (atom b) (= a b) 0)(if (atom b) 0 (if (equal (car a) (car b)) (equal (cdr a) (cdr b)) 0)))))
+(if (equal (quote(a b)) (read)) ok bad)
+(a b)
+(quit)

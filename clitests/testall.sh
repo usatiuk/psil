@@ -22,6 +22,25 @@ for FILE in *.test.psil; do
       rm $FILE.res
 done
 
+for FILE in *.testi.psil; do
+      echo "TESTING INTERACTIVE $FILE"
+      $PSIL --repl+ --default_log_level:0 < $FILE > $FILE.res
+      if [ $? -ne 0 ]; then
+          FAILED+=("test-"$FILE)
+          continue
+      fi
+
+      diff -w $FILE.res $FILE.ex
+
+      if [ $? -ne 0 ]; then
+          FAILED+=("test-"$FILE)
+          continue
+      fi
+
+       echo "$FILE OK"
+      rm $FILE.res
+done
+
 if [ ${#FAILED[@]} -eq 0 ]; then
     echo "ALL TESTS PASSED"
 else
