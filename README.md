@@ -88,3 +88,22 @@ Super debug mode:
 ```shell
 build/src/psil -f clitests/decorate.psil --repl- --command_strs+ --default_log_level:4 --log:MemoryContext:3
 ```
+
+# Some notes on the implementation
+
+The implementation is rather straightforward, based mostly on the compiler from "THE ARCHITECTURE OF SYMBOLIC
+COMPUTERS", with little modification and some additions. Notably, the let/letrec is more lisp-like, using racket-like
+name-value pairs instead of them being in separate lists like in the book. Also, there's support for top-level functions
+using `define`, and a simple concurrent garbage collector.
+
+There are three basic value types which is a string atom, number atom, and a cons cell.
+
+String atoms are basically used only internally, and you can't do much with them other than printing them. With number
+atoms you can do all the usual arithmetic, and they also serve as bools - any value greater than 0 is considered true
+for the purposes of `if`. And of course, all the usual stuff with cons cells - `car`, `cdr`, `cons`...
+
+Other language features were implemented to the extent that was required for writing some simple programs copied from
+what I have done for homework - it's in the `clitests` folder (and for simpler examples there's `examples.psil`, and it
+probably serves as the best reference for the
+language that this interpreter interprets :)
+

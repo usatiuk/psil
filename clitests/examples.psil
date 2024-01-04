@@ -1,0 +1,19 @@
+(let ((plus (lambda (a b) (+ a b)))) (plus 2 3))
+(let ((minus (lambda (a b) (- a b)))) (minus 2 3))
+(let ((minusone (lambda (a b) (- a b))) (minustwo (lambda (a b) (- b a)))) (minustwo 2 (minusone 3 1)))
+
+(let ((iffn (lambda (a) (if a 1 2)))) (iffn 0))
+(let ((iffn (lambda (a) (if a 1 2)))) (iffn 1))
+(let ((iffn (lambda (a) (if (> a 1) 1 2)))) (iffn 1))
+(let ((iffn (lambda (a) (if (> a 1) 1 2)))) (iffn 2))
+
+(letrec ((fib (lambda (n)   (if (> n 0)
+                                (if (> n 1)
+                                    (+ (fib (- n 1))
+                                       (fib (- n 2)))
+                                    1)
+                                0))
+)) (fib 10))
+
+(define (globalplus x y) (+ x y))
+(globalplus 2 3)
