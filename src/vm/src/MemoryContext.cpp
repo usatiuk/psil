@@ -23,7 +23,10 @@ MemoryContext::~MemoryContext() {
     assert(cell_count() == 0);
 
     _gc_thread_stop = true;
-    _gc_request_cv.notify_all();
+    {
+        std::lock_guard l(_gc_request_m);
+        _gc_request_cv.notify_all();
+    }
     _gc_thread.join();
 }
 
@@ -55,10 +58,10 @@ void MemoryContext::remove_root(Cell *c) {
 }
 
 void MemoryContext::gc_thread_entry() {
-    while (true) {
+    while (!_gc_thread_stop) {
         {
             std::unique_lock l(_gc_request_m);
-            _gc_request_cv.wait(l, [&] { return _gc_request || _gc_thread_stop; });
+            _gc_request_cv.wait_for(l, std::chrono::seconds(1), [&] { return _gc_request || _gc_thread_stop; });
         }
         if (_gc_thread_stop) return;
 
