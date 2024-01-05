@@ -106,6 +106,5 @@ for the purposes of `if`. And of course, all the usual stuff with cons cells - `
 
 Other language features were implemented to the extent that was required for writing some simple programs copied from
 what I have done for homework - it's in the `clitests` folder (and for simpler examples there's `examples.psil`, and it
-probably serves as the best reference for the
-language that this interpreter interprets :)
+probably serves as the best reference for the language that this interpreter interprets :)
 
