@@ -40,7 +40,7 @@ target_link_libraries(
 
 
 include(GoogleTest)
-gtest_discover_tests(VMTest)
-gtest_discover_tests(VMWithParserTest)
-gtest_discover_tests(GCTest)
-gtest_discover_tests(CompilerTest)
+gtest_discover_tests(VMTest DISCOVERY_TIMEOUT 600)
+gtest_discover_tests(VMWithParserTest DISCOVERY_TIMEOUT 600)
+gtest_discover_tests(GCTest DISCOVERY_TIMEOUT 600)
+gtest_discover_tests(CompilerTest DISCOVERY_TIMEOUT 600)
