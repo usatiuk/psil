@@ -26,7 +26,7 @@ void VM::step() {
     CellValType poppedCmd = poppedH.type() == CellType::STRATOM ? str_to_cmd.at(poppedH.strval()) : poppedH.val();
 
     Logger::log(
-            "VM",
+            Logger::VM,
             [&](std::ostream &out) {
                 out << "Executing " << cmd_to_str.at(poppedCmd) << "\n";
                 if (!_s.null()) out << "s:" << _s << "\n";
@@ -104,7 +104,7 @@ void VM::step() {
             _d.push(_c);
 
             std::optional<std::string> name;
-            if (Logger::en_level("VM", Logger::DEBUG)) {
+            if (Logger::en_level(Logger::VM, Logger::DEBUG)) {
                 name = "unknown";
                 if (_globals_names_map.find(closureH) != _globals_names_map.end())
                     name = _globals_names_map.at(closureH);
@@ -116,7 +116,7 @@ void VM::step() {
             _e = closureH.cdr();
 
             Logger::log(
-                    "VM",
+                    Logger::VM,
                     [&](std::ostream &out) {
                         out << _cur_call_level;
                         for (int i = 0; i < _cur_call_level; i++) out << "  ";
@@ -133,7 +133,7 @@ void VM::step() {
             _cur_call_level--;
 
             Handle n;
-            if (Logger::en_level("VM", Logger::DEBUG)) n = _d.pop();
+            if (Logger::en_level(Logger::VM, Logger::DEBUG)) n = _d.pop();
 
             Handle c = _d.pop();
             Handle e = _d.pop();
@@ -146,7 +146,7 @@ void VM::step() {
             _s = s;
 
             Logger::log(
-                    "VM",
+                    Logger::VM,
                     [&](std::ostream &out) {
                         out << _cur_call_level;
                         for (int i = 0; i < _cur_call_level; i++) out << "  ";
@@ -175,7 +175,7 @@ void VM::step() {
             _d.push(origE);
             _d.push(_c);
 
-            if (Logger::en_level("VM", Logger::DEBUG)) _d.push(Handle("rap"));
+            if (Logger::en_level(Logger::VM, Logger::DEBUG)) _d.push(Handle("rap"));
 
             _s = Handle::cons(nullptr, nullptr);
             _c = closureH.car();
@@ -268,7 +268,7 @@ void VM::step() {
             Handle code = _s.pop();
             Handle newc = Compiler::compile(code, _globals_names);
             Logger::log(
-                    "Compiler",
+                    Logger::Compiler,
                     [&](std::ostream &out) {
                         out << "Compiled (" << code << ")";
                         out << " to ";
@@ -312,7 +312,7 @@ void VM::step() {
     }
 
     Logger::log(
-            "VM",
+            Logger::VM,
             [&](std::ostream &out) {
                 out << "Executed " << cmd_to_str.at(poppedCmd) << "\n";
                 if (!_s.null()) out << "s:" << _s << "\n";

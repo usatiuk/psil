@@ -15,8 +15,8 @@ public:
     void SetUp() override {
         Options::set<size_t>("cell_limit", 50000);
         Options::set<bool>("command_strs", true);
-        Logger::set_level("VM", Logger::DEBUG);
-        Logger::set_level("Compiler", Logger::DEBUG);
+        Logger::set_level(Logger::VM, Logger::DEBUG);
+        Logger::set_level(Logger::Compiler, Logger::DEBUG);
     }
 
     void TearDown() override {
@@ -281,7 +281,7 @@ TEST(CompilerTest, GlobalDefineFnRec) {
     std::stringstream ssin;
     std::stringstream ssout;
     Options::set<bool>("command_strs", false);
-    Logger::set_level("VM", Options::get<size_t>("default_log_level"));
+    Logger::set_level(Logger::VM, Options::get<size_t>("default_log_level"));
     {
         VM vm(ssin, ssout);
         Parser parser;
@@ -291,7 +291,7 @@ TEST(CompilerTest, GlobalDefineFnRec) {
         vm.run();
     }
     Options::set<bool>("command_strs", true);
-    Logger::set_level("VM", Logger::DEBUG);
+    Logger::set_level(Logger::VM, Logger::DEBUG);
     ssout.flush();
     EXPECT_EQ(ssout.str(), "6765\n");
 }

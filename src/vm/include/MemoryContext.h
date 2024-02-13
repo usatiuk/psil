@@ -57,7 +57,7 @@ public:
         std::lock_guard l(_gc_dirty_notif_queue_lock);
         return f([&](Cell *c) {
             if (c == nullptr) return;
-            Logger::log("MemoryContext", [&](std::ostream &out) { out << "marked dirty: " << c; }, Logger::DEBUG);
+            Logger::log(Logger::MemoryContext, [&](std::ostream &out) { out << "marked dirty: " << c; }, Logger::DEBUG);
             _gc_dirty_notif_queue.emplace(c);
         });
     }
@@ -74,7 +74,7 @@ private:
 
         if ((_cells_num + tcellnum) >= (Options::get<size_t>("cell_limit"))) {
             // We might need to run GC twice as it has to process the messages;
-            Logger::log("MemoryContext", "Running forced gc", Logger::ERROR);
+            Logger::log(Logger::MemoryContext, "Running forced gc", Logger::ERROR);
             for (int i = 0; i < 3 && (_cells_num + tcellnum) >= (Options::get<size_t>("cell_limit")); i++) {
                 request_gc_and_wait();
                 {
@@ -83,7 +83,7 @@ private:
                 }
             }
             if ((_cells_num + tcellnum) >= (Options::get<size_t>("cell_limit"))) {
-                Logger::log("MemoryContext", "Out of cells", Logger::ERROR);
+                Logger::log(Logger::MemoryContext, "Out of cells", Logger::ERROR);
 
                 throw std::runtime_error("Out of cells");
             }

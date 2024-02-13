@@ -38,7 +38,7 @@ void parse_options(int argc, char *argv[]) {
         if (split.at(0) == "log") {
             if (split.size() != 3) throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL");
             try {
-                Logger::set_level(split.at(1), std::stoi(split.at(2)));
+                Logger::set_level(Logger::str_to_tag(split.at(1)), std::stoi(split.at(2)));
             } catch (...) { throw std::invalid_argument("Log options must be in format --log:TAG:LEVEL"); }
         } else if (split.size() == 1) {
             std::string str = split.at(0);
