@@ -11,10 +11,13 @@
 #include <iostream>
 #include <list>
 #include <map>
-#include <mutex>
 #include <queue>
 #include <set>
+
+#ifndef NO_THREADS
+#include <mutex>
 #include <thread>
+#endif
 
 #include "Cell.h"
 #include "Handle.h"
@@ -38,28 +41,38 @@ public:
     }
 
     void request_gc_and_wait() {
+#ifndef NO_THREADS
         std::unique_lock l(_gc_done_m);
         _gc_done = false;
         { request_gc(); }
         if (!_gc_done) _gc_done_cv.wait(l, [&] { return _gc_done.load(); });
+#else
+        gc_thread_entry();
+#endif
     }
 
     void request_gc() {
+#ifndef NO_THREADS
         std::lock_guard l(_gc_request_m);
         _gc_request = true;
         _gc_request_cv.notify_all();
+#endif
     }
 
     size_t cell_count() const { return _cells_num; }
 
     template<typename R>
     R run_dirty(const std::function<R(std::function<void(Cell *)>)> &f) {
+#ifndef NO_THREADS
         std::lock_guard l(_gc_dirty_notif_queue_lock);
         return f([&](Cell *c) {
             if (c == nullptr) return;
             Logger::log(Logger::MemoryContext, [&](std::ostream &out) { out << "marked dirty: " << c; }, Logger::DEBUG);
             _gc_dirty_notif_queue.emplace(c);
         });
+#else
+        return f([](Cell *c) {});
+#endif
     }
 
 private:
@@ -68,7 +81,9 @@ private:
 
         size_t tcellnum;
         {
+#ifndef NO_THREADS
             std::lock_guard tmplg(_new_roots_lock);
+#endif
             tcellnum = _temp_cells.size();
         }
 
@@ -78,7 +93,9 @@ private:
             for (int i = 0; i < 3 && (_cells_num + tcellnum) >= (Options::get<size_t>("cell_limit")); i++) {
                 request_gc_and_wait();
                 {
+#ifndef NO_THREADS
                     std::lock_guard tmplg(_new_roots_lock);
+#endif
                     tcellnum = _temp_cells.size();
                 }
             }
@@ -92,7 +109,9 @@ private:
         CT *cell = new CT(std::forward<Args>(args)...);
 
         {
+#ifndef NO_THREADS
             std::lock_guard tmplg(_new_roots_lock);
+#endif
             Handle ret(cell);
             _temp_cells.emplace_back(cell);
             if ((_cells_num + _temp_cells.size()) >=
@@ -115,6 +134,7 @@ private:
 
     std::map<Cell *, int64_t> _roots;
     std::map<Cell *, int64_t> _new_roots;
+#ifndef NO_THREADS
     std::recursive_mutex _new_roots_lock;
 
     std::set<Cell *> _gc_dirty_notif_queue;
@@ -130,6 +150,7 @@ private:
 
     std::thread _gc_thread;
     std::atomic<bool> _gc_thread_stop = false;
+#endif
 };
 
 #endif//PSIL_MEMORYCONTEXT_H

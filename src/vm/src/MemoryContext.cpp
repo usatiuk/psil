@@ -10,7 +10,11 @@
 #include <sstream>
 #include <unordered_set>
 
-MemoryContext::MemoryContext() { _gc_thread = std::thread(std::bind(&MemoryContext::gc_thread_entry, this)); }
+MemoryContext::MemoryContext() {
+#ifndef NO_THREADS
+    _gc_thread = std::thread(std::bind(&MemoryContext::gc_thread_entry, this));
+#endif
+}
 
 MemoryContext::~MemoryContext() {
     // Three times because the first one might not start it as it's been running already
@@ -22,18 +26,22 @@ MemoryContext::~MemoryContext() {
 
     assert(cell_count() == 0);
 
+#ifndef NO_THREADS
     _gc_thread_stop = true;
     {
         std::lock_guard l(_gc_request_m);
         _gc_request_cv.notify_all();
     }
     _gc_thread.join();
+#endif
 }
 
 
 void MemoryContext::add_root(Cell *c) {
     {
+#ifndef NO_THREADS
         std::lock_guard l(_new_roots_lock);
+#endif
         _new_roots[c]++;
         Logger::log(
                 Logger::MemoryContext,
@@ -45,7 +53,9 @@ void MemoryContext::add_root(Cell *c) {
 }
 void MemoryContext::remove_root(Cell *c) {
     {
+#ifndef NO_THREADS
         std::lock_guard l(_new_roots_lock);
+#endif
         _new_roots[c]--;
         Logger::log(
                 Logger::MemoryContext,
@@ -58,13 +68,14 @@ void MemoryContext::remove_root(Cell *c) {
 }
 
 void MemoryContext::gc_thread_entry() {
+#ifndef NO_THREADS
     while (!_gc_thread_stop) {
         {
             std::unique_lock l(_gc_request_m);
             _gc_request_cv.wait_for(l, std::chrono::seconds(1), [&] { return _gc_request || _gc_thread_stop; });
         }
         if (_gc_thread_stop) return;
-
+#endif
         Logger::log(Logger::MemoryContext, [&](std::ostream &out) { out << "gc start "; }, Logger::DEBUG);
         auto gcstart = std::chrono::high_resolution_clock::now();
 
@@ -97,7 +108,9 @@ void MemoryContext::gc_thread_entry() {
             {
                 decltype(_temp_cells) temp_cells;
                 {
+#ifndef NO_THREADS
                     std::lock_guard l(_new_roots_lock);
+#endif
                     std::swap(new_roots, _new_roots);
                     std::swap(temp_cells, _temp_cells);
                 }
@@ -147,6 +160,7 @@ void MemoryContext::gc_thread_entry() {
                     Logger::INFO);
         }
 
+#ifndef NO_THREADS
         {
             auto start = std::chrono::high_resolution_clock::now();
             decltype(_gc_dirty_notif_queue) dirtied;
@@ -177,6 +191,7 @@ void MemoryContext::gc_thread_entry() {
                             std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count()),
                     Logger::INFO);
         }
+#endif
         {
             auto start = std::chrono::high_resolution_clock::now();
 
@@ -212,7 +227,7 @@ void MemoryContext::gc_thread_entry() {
                         std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(gcstop - gcstart).count()),
                 Logger::INFO);
 
-
+#ifndef NO_THREADS
         {
             std::unique_lock l(_gc_done_m);
             std::unique_lock l2(_gc_request_m);
@@ -221,6 +236,7 @@ void MemoryContext::gc_thread_entry() {
             _gc_done_cv.notify_all();
         }
     }
+#endif
 }
 MemoryContext &MemoryContext::get() {
     static MemoryContext mc;
