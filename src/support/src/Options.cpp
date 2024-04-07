@@ -11,7 +11,4 @@ Options &Options::get() {
     return opts;
 }
 
-void Options::reset() {
-    std::lock_guard l(get()._mutex);
-    get()._current = _defaults;
-}
+void Options::reset() { get()._current = _defaults; }
