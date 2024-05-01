@@ -18,15 +18,29 @@ using namespace Command;
 
 
 static std::unordered_map<std::string_view, CommandE> builtins{
-        {"+", ADD}, {"-", SUB},     {"cons", CONS}, {"car", CAR},     {"cdr", CDR},   {"=", EQ},
-        {">", GT},  {"<", LT},      {"nil", NIL},   {"nil?", NILC},   {"atom", ATOM}, {"*", MULT},
-        {"/", DIV}, {"read", READ}, {"eval", EVAL}, {"print", PRINT}, {"quit", QUIT}};
+        {"+", ADD},
+        {"-", SUB},
+        {"cons", CONS},
+        {"car", CAR},
+        {"cdr", CDR},
+        {"=", EQ},
+        {">", GT},
+        {"<", LT},
+        {"nil", NIL},
+        {"nil?", NILC},
+        {"atom", ATOM},
+        {"*", MULT},
+        {"/", DIV},
+        {"read", READ},
+        {"eval", EVAL},
+        {"print", PRINT},
+        {"quit", QUIT}};
 
 Handle Compiler::compile(const Handle &src, Handle fake_env, const Handle &suffix) {
     Handle out;
 
     std::function<Handle(Handle)> compileArgsRaw = [&](Handle args) {
-        Handle out;
+        Handle             out;
         std::stack<Handle> rev;
         while (!args.null()) {
             rev.push(args.car());
@@ -146,8 +160,8 @@ Handle Compiler::findIndex(const Handle &symbol, const Handle &env) {
     Handle curFrame = env;
 
     while (!curFrame.null()) {
-        int64_t arg = 1;
-        Handle curArg = curFrame.car();
+        int64_t arg    = 1;
+        Handle  curArg = curFrame.car();
 
         while (!curArg.null()) {
             if (curArg.car() == symbol) return Handle::cons(frame, arg);

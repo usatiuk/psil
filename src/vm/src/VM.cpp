@@ -22,7 +22,7 @@ void VM::run() {
 }
 
 void VM::step() {
-    Handle poppedH = _c.pop();
+    Handle      poppedH   = _c.pop();
     CellValType poppedCmd = poppedH.type() == CellType::STRATOM ? str_to_cmd.at(poppedH.strval()) : poppedH.val();
 
     Logger::log(
@@ -57,7 +57,7 @@ void VM::step() {
             Handle poppedH2 = _c.pop();
 
             int64_t frame = poppedH2.car().val();
-            int64_t arg = poppedH2.cdr().val();
+            int64_t arg   = poppedH2.cdr().val();
 
             assert(frame > 0);
             assert(arg > 0);
@@ -97,7 +97,7 @@ void VM::step() {
         }
         case AP: {
             Handle closureH = _s.pop();
-            Handle argsH = _s.pop();
+            Handle argsH    = _s.pop();
 
             _d.push(_s);
             _d.push(_e);
@@ -167,7 +167,7 @@ void VM::step() {
         }
         case RAP: {
             Handle closureH = _s.pop();
-            Handle argsH = _s.pop();
+            Handle argsH    = _s.pop();
 
             Handle origE = _e.cdr();
 
@@ -292,8 +292,8 @@ void VM::step() {
         }
         case PRINT: {
             if (!_s.null()) {
-                Handle val = _s.pop();
-                bool cons = !val.atom();
+                Handle val  = _s.pop();
+                bool   cons = !val.atom();
                 if (cons) _outstream << "(";
                 _outstream << val;
                 if (cons) _outstream << ")";

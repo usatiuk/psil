@@ -103,7 +103,7 @@ void MemoryContext::gc_thread_entry() {
         };
 
         {
-            auto start = std::chrono::high_resolution_clock::now();
+            auto                 start = std::chrono::high_resolution_clock::now();
             decltype(_new_roots) new_roots;
             {
                 decltype(_temp_cells) temp_cells;
@@ -162,7 +162,7 @@ void MemoryContext::gc_thread_entry() {
 
 #ifndef NO_THREADS
         {
-            auto start = std::chrono::high_resolution_clock::now();
+            auto                            start = std::chrono::high_resolution_clock::now();
             decltype(_gc_dirty_notif_queue) dirtied;
             {
                 std::lock_guard dql(_gc_dirty_notif_queue_lock);
@@ -231,7 +231,7 @@ void MemoryContext::gc_thread_entry() {
         {
             std::unique_lock l(_gc_done_m);
             std::unique_lock l2(_gc_request_m);
-            _gc_done = true;
+            _gc_done    = true;
             _gc_request = false;
             _gc_done_cv.notify_all();
         }

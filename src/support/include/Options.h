@@ -31,7 +31,7 @@ public:
         o._current[opt] = val;
     }
 
-    static void reset();
+    static void     reset();
     static Options &get();
 
 private:
@@ -45,4 +45,4 @@ private:
 };
 
 
-#endif//PSIL_OPTIONS_H
+#endif //PSIL_OPTIONS_H

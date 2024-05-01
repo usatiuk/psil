@@ -29,7 +29,7 @@ void parse_options(int argc, char *argv[]) {
         std::vector<std::string> split;
         {
             std::istringstream ins(rest);
-            std::string cur;
+            std::string        cur;
             while (std::getline(ins, cur, ':')) { split.emplace_back(cur); }
         }
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         parse_options(argc, argv);
 
         Handle repl = Parser::parse_str("(READ EVAL PRINT STOP)");
-        Handle epl = Parser::parse_str("(EVAL PRINT STOP)");
+        Handle epl  = Parser::parse_str("(EVAL PRINT STOP)");
 
         VM vm;
 

@@ -90,14 +90,14 @@ public:
     }
 
     Handle pop();
-    void push(const Handle &what);
-    void append(const Handle &what);
-    void splice(const Handle &what);
+    void   push(const Handle &what);
+    void   append(const Handle &what);
+    void   splice(const Handle &what);
 
     static Handle makeNumCell(int64_t val);
     static Handle makeStrCell(std::string val);
-    void setcar(const Handle &car);
-    void setcdr(const Handle &cdr);
+    void          setcar(const Handle &car);
+    void          setcdr(const Handle &cdr);
 
     friend std::ostream &operator<<(std::ostream &stream, const Handle &h) {
         if (h._target) h._target->print(stream);
@@ -124,6 +124,6 @@ namespace std {
                 return std::hash<uintptr_t>()((uintptr_t) c.get());
         }
     };
-}// namespace std
+} // namespace std
 
-#endif//PSIL_HANDLE_H
+#endif //PSIL_HANDLE_H

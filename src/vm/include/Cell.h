@@ -14,7 +14,9 @@
 #include <string>
 #include <utility>
 
-enum class CellType { NUMATOM, STRATOM, CONS };
+enum class CellType { NUMATOM,
+                      STRATOM,
+                      CONS };
 
 using CellValType = int64_t;
 
@@ -22,7 +24,7 @@ struct Cell {
     explicit Cell(CellType type) : _type(type) {}
     virtual ~Cell() = 0;
 
-    CellType _type;
+    CellType          _type;
     std::atomic<bool> _live = false;
 
     virtual void print(std::ostream &out) const = 0;
@@ -90,7 +92,7 @@ struct ConsCell : public Cell {
     }
 
     void print(std::ostream &out) const override {
-        std::stringstream res;
+        std::stringstream      res;
         std::set<const Cell *> seen{this};
         if (_car) {
             if (_car.load()->_type == CellType::CONS) {
@@ -118,4 +120,4 @@ struct ConsCell : public Cell {
     }
 };
 
-#endif//PSIL_CELL_H
+#endif //PSIL_CELL_H

@@ -126,9 +126,9 @@ private:
     void add_root(Cell *c);
     void remove_root(Cell *c);
 
-    std::list<Cell *> _cells;
+    std::list<Cell *>   _cells;
     std::atomic<size_t> _cells_num = 0;
-    std::list<Cell *> _temp_cells;
+    std::list<Cell *>   _temp_cells;
 
     void gc_thread_entry();
 
@@ -138,19 +138,19 @@ private:
     std::recursive_mutex _new_roots_lock;
 
     std::set<Cell *> _gc_dirty_notif_queue;
-    std::mutex _gc_dirty_notif_queue_lock;
+    std::mutex       _gc_dirty_notif_queue_lock;
 
-    std::atomic<bool> _gc_request = false;
-    std::mutex _gc_request_m;
+    std::atomic<bool>       _gc_request = false;
+    std::mutex              _gc_request_m;
     std::condition_variable _gc_request_cv;
 
-    std::atomic<bool> _gc_done = false;
-    std::mutex _gc_done_m;
+    std::atomic<bool>       _gc_done = false;
+    std::mutex              _gc_done_m;
     std::condition_variable _gc_done_cv;
 
-    std::thread _gc_thread;
+    std::thread       _gc_thread;
     std::atomic<bool> _gc_thread_stop = false;
 #endif
 };
 
-#endif//PSIL_MEMORYCONTEXT_H
+#endif //PSIL_MEMORYCONTEXT_H

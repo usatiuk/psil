@@ -32,7 +32,7 @@ Handle Handle::cons(const Handle &car, const Handle &cdr) {
 
 Handle Handle::pop() {
     auto ret = car();
-    *this = cdr();
+    *this    = cdr();
     return ret;
 }
 
