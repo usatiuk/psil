@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        threads: [ "-DNO_THREADS", "" ]
+        threads: [ "-DNO_THREADS=ON", "" ]
 
     steps:
       - name: Checkout repo
