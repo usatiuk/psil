@@ -2,6 +2,7 @@
 
 #include "Command.h"
 #include "VM.h"
+
 class Environment : public ::testing::Environment {
 public:
     ~Environment() override {}
@@ -36,7 +37,7 @@ TEST(VMTest, BasicHello) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "h");
+    ASSERT_EQ(ssout.str(), "h");
 }
 
 //TODO: maybe rewrite it all...
@@ -84,7 +85,7 @@ TEST(VMTest, BasicHello) {
 //        vm.run();
 //    }
 //    ssout.flush();
-//    EXPECT_EQ(ssout.str(), "14");
+//    ASSERT_EQ(ssout.str(), "14");
 //}
 //
 //TEST(VMTest, SimpleFunction) {
@@ -112,7 +113,7 @@ TEST(VMTest, BasicHello) {
 //        vm.run();
 //    }
 //    ssout.flush();
-//    EXPECT_EQ(ssout.str(), "3");
+//    ASSERT_EQ(ssout.str(), "3");
 //}
 //
 //TEST(VMTest, RecursiveFunction) {
@@ -257,5 +258,5 @@ TEST(VMTest, BasicHello) {
 //vm.run();
 //}
 //ssout.flush();
-//EXPECT_EQ(ssout.str(), "2358 55");
+//ASSERT_EQ(ssout.str(), "2358 55");
 //}

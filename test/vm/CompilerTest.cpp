@@ -39,7 +39,7 @@ TEST(CompilerTest, BasicHello) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "3\n");
+    ASSERT_EQ(ssout.str(), "3\n");
 }
 
 TEST(CompilerTest, BasicLet) {
@@ -54,7 +54,7 @@ TEST(CompilerTest, BasicLet) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1\n");
+    ASSERT_EQ(ssout.str(), "1\n");
 }
 
 TEST(CompilerTest, BasicFn) {
@@ -69,7 +69,7 @@ TEST(CompilerTest, BasicFn) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "5\n");
+    ASSERT_EQ(ssout.str(), "5\n");
 }
 
 TEST(CompilerTest, BasicFn2) {
@@ -84,7 +84,7 @@ TEST(CompilerTest, BasicFn2) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "-1\n");
+    ASSERT_EQ(ssout.str(), "-1\n");
 }
 
 TEST(CompilerTest, MultiLet) {
@@ -95,7 +95,7 @@ TEST(CompilerTest, MultiLet) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn 2 3)) EVAL "
-                       "PRINT STOP)");
+                "PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -104,12 +104,12 @@ TEST(CompilerTest, MultiLet) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (let ((plfn (lambda (a b) (- a b))) (plfn2 (lambda (a b) (- b a)))) (plfn2 2 3)) EVAL "
-                       "PRINT STOP)");
+                "PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "-1\n1\n");
+    ASSERT_EQ(ssout.str(), "-1\n1\n");
 }
 
 
@@ -125,8 +125,9 @@ TEST(CompilerTest, BasicFnIfT) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1\n");
+    ASSERT_EQ(ssout.str(), "1\n");
 }
+
 TEST(CompilerTest, BasicFnIfF) {
     std::stringstream ssin;
     std::stringstream ssout;
@@ -139,8 +140,9 @@ TEST(CompilerTest, BasicFnIfF) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "2\n");
+    ASSERT_EQ(ssout.str(), "2\n");
 }
+
 TEST(CompilerTest, RecursiveFn) {
     std::stringstream ssin;
     std::stringstream ssout;
@@ -149,12 +151,12 @@ TEST(CompilerTest, RecursiveFn) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (letrec ((fib (lambda (n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ))) "
-                       "(fib 10)) EVAL PRINT STOP)");
+                "(fib 10)) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "55\n");
+    ASSERT_EQ(ssout.str(), "55\n");
 }
 
 TEST(CompilerTest, GlobalDefine) {
@@ -169,7 +171,7 @@ TEST(CompilerTest, GlobalDefine) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1\n");
+    ASSERT_EQ(ssout.str(), "1\n");
 }
 
 
@@ -185,7 +187,7 @@ TEST(CompilerTest, GlobalDefineFn) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "5\n");
+    ASSERT_EQ(ssout.str(), "5\n");
 }
 
 TEST(CompilerTest, GlobalDefineFnQuote) {
@@ -200,7 +202,7 @@ TEST(CompilerTest, GlobalDefineFnQuote) {
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "(1 2)\n");
+    ASSERT_EQ(ssout.str(), "(1 2)\n");
 }
 
 TEST(CompilerTest, GlobalDefineFnCar) {
@@ -211,12 +213,12 @@ TEST(CompilerTest, GlobalDefineFnCar) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (define (carr l) (car l)) EVAL LDC (carr (quote (1 2))) EVAL PRINT LDC (carr (cdr (quote "
-                       "(1 2)))) EVAL PRINT STOP)");
+                "(1 2)))) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1\n2\n");
+    ASSERT_EQ(ssout.str(), "1\n2\n");
 }
 
 TEST(CompilerTest, GlobalDefineFnEq) {
@@ -227,7 +229,7 @@ TEST(CompilerTest, GlobalDefineFnEq) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (define (eqtest l) (= l ())) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest (nil)) "
-                       "EVAL PRINT STOP)");
+                "EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
@@ -236,12 +238,12 @@ TEST(CompilerTest, GlobalDefineFnEq) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (define (eqtest l) (= l (nil))) EVAL LDC (eqtest (quote ())) EVAL PRINT LDC (eqtest "
-                       "(nil)) EVAL PRINT STOP)");
+                "(nil)) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "1\n1\n1\n1\n");
+    ASSERT_EQ(ssout.str(), "1\n1\n1\n1\n");
 }
 
 TEST(CompilerTest, GlobalDefineFnMulti) {
@@ -252,12 +254,12 @@ TEST(CompilerTest, GlobalDefineFnMulti) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (define (one x y) (+ x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) "
-                       "EVAL PRINT STOP)");
+                "EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "6\n");
+    ASSERT_EQ(ssout.str(), "6\n");
 }
 
 TEST(CompilerTest, GlobalDefineFnMultiTwo) {
@@ -268,12 +270,12 @@ TEST(CompilerTest, GlobalDefineFnMultiTwo) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (define (one x y) (- x y)) EVAL LDC (define (two x y) (one (+ x 1) y)) EVAL LDC (two 2 3) "
-                       "EVAL PRINT STOP)");
+                "EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "0\n");
+    ASSERT_EQ(ssout.str(), "0\n");
 }
 
 
@@ -286,12 +288,12 @@ TEST(CompilerTest, GlobalDefineFnRec) {
         VM vm(ssin, ssout);
         Parser parser;
         parser.loadStr("(LDC (define (fib n) (if n (if (+ n -1) (+ (fib (+ n -1)) (fib(+ n -2))) 1) 0) ) EVAL LDC (fib "
-                       "20) EVAL PRINT STOP)");
+                "20) EVAL PRINT STOP)");
         vm.loadControl(parser.parseExpr());
         vm.run();
     }
     Options::set<bool>("command_strs", true);
     Logger::set_level(Logger::VM, Logger::DEBUG);
     ssout.flush();
-    EXPECT_EQ(ssout.str(), "6765\n");
+    ASSERT_EQ(ssout.str(), "6765\n");
 }
